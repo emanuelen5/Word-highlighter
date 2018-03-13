@@ -28,7 +28,23 @@ This method however only colorizes the background (addressed by [this thread][Su
 The snippet above is sufficient for simple highlights (paste into the Sublime text console to run), but is limited to the current theme and its defined color scopes. To define more scopes and colors dynamically, check the [ANSI highlighter][SublimeANSI] or the [Color Highlighter][ColorHighlighter]. The ANSI highlighter seems much cleaner and simpler to use, but the Color highlighter might be more complete (with some cool things to "steal").
 
 ### Changing the syntax file
-`set_syntax_file(syntax_file)`: Changes the syntax used by the view. `syntax_file` should be a name along the lines of `Packages/Python/Python.tmLanguage`. To retrieve the current syntax, use `view.settings().get('syntax')`.
+```python
+>>> view.settings().get('syntax')
+'Packages/Markdown Extended/Syntaxes/Markdown Extended.sublime-syntax'
+>>> view.set_syntax_file('Packages/Markdown/Markdown.sublime-syntax')
+>>> view.settings().get('syntax')
+'Packages/Markdown/Markdown.sublime-syntax'
+```
+
+### Changing the color scheme
+```python
+>>> view.settings().set('color_scheme', 'Packages/User/Monokai/Monokai (SL).tmTheme')
+>>> view.settings().get('color_scheme')
+'Packages/User/Monokai/Monokai (SL).tmTheme'
+>>> view.settings().erase('color_scheme')
+>>> view.settings().get('color_scheme')
+'Packages/User/SublimeLinter/Monokai Extended (SL).tmTheme'
+```
 
 ## Running python code
 See the Sublime text guides for [plugins][Sublime Text: Plugins] together with the [API][Sublime text API reference].
