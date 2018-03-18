@@ -1,0 +1,6 @@
+[
+  {
+    "caption": "Highlight instances of selection", 
+    "command": "word_highlighter_highlight_instances_of_selection"
+  },
+]
