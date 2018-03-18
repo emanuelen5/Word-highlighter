@@ -1,0 +1,38 @@
+[
+    {
+        "id": "preferences",
+        "children":
+        [
+            {
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "Word Highlighter",
+                        "mnemonic": "w",
+                        "children":
+                        [
+                            {
+                                "caption": "Settings",
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/Word Highlighter/word_highlighter.sublime-settings",
+                                }
+                            },
+                            {
+                                "caption": "-"
+                            },
+                            {
+                                "caption": "Key Bindings",
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/Word Highlighter/Controls/Default ($platform).sublime-keymap",
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
