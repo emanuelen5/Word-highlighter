@@ -46,6 +46,11 @@ The snippet above is sufficient for simple highlights (paste into the Sublime te
 'Packages/User/SublimeLinter/Monokai Extended (SL).tmTheme'
 ```
 
+#### Color scheme content
+[Color scheme reference][Color scheme reference: Scope]
+
+[Color scheme reference: Scope]: http://docs.sublimetext.info/en/latest/reference/color_schemes.html#scoped-settings
+
 ## Running python code
 See the Sublime text guides for [plugins][Sublime Text: Plugins] together with the [API][Sublime text API reference].
 
@@ -53,8 +58,13 @@ Implement a class that inherits `sublime_plugin.TextCommand` and implements a `r
 
 ```python
 class vhdlModeInsertCommentLine(sublime_plugin.TextCommand):
+  # Run once upon load of each buffer
+  def __init__(self, view):
+    self.view = view
+
+  # Run when the command is called
   def run(self, edit):
-    # ...
+    pass
 ```
 
 [Sublime Text: Plugins]: http://docs.sublimetext.info/en/latest/extensibility/plugins.html
