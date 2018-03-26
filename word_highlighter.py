@@ -79,9 +79,17 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         text_selections = list(set(text_selections))
 
         print("text_selections: " + str(text_selections))
+
+        # Find all instances of each selection
+        import re
+        for pattern in text_selections:
+            escaped_pattern = re.escape(pattern)
+            regions = self.view.find_all(escaped_pattern)
+            self.view.add_regions('unique_region_key', regions, 'scope.name')
+
         # TODO:
-        # 1. Get the words from each selection
-        #    Empty selections are expanded to words, nonempty are used as-is
-        # 2. Get a unique color association for each selection
-        # 3. Find all of the matching words
-        # 4. Use add_region() to set the scope for the regions
+        # 1. Get a unique color association for each selection
+        # 2. Find all of the matching words
+        # 3. Use add_region() to set the scope for the regions
+        # 4. Save the words that have been highlighter
+        # 5. Update the highlighted regions if they are edited
