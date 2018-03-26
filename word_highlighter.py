@@ -2,8 +2,7 @@ import sublime
 import sublime_plugin
 
 # Add some base colors to use for selections (perhaps read from settings file)
-SCOPE_COLORS = [
-]
+SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
 
 # Check that select bits are set
 def bits_set(value, *bits):
@@ -17,10 +16,104 @@ def bits_not_set(value, *bits):
     bit_mask = reduce(lambda x,y: x | y, bits)
     return (value & bit_mask) == 0
 
+## Define some color constants
+class ColorType(object):
+    def __init__(self, color_string):
+        self.color_string = color_string
+
+    def __eq__(self, right):
+        return self.color_string == right.color_string
+
+UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
+NEXT_COLOR        = ColorType("NEXT_COLOR")
+RANDOM_COLOR      = ColorType("RANDOM_COLOR")
+
+# Instances that combine a word with a color scope
+class WordHighlight(object):
+    def __init__(self, word, color=UNSPECIFIED_COLOR):
+        assert isinstance(word, str)
+        assert isinstance(color, ColorType)
+        import random
+        self.word = word
+        if color == RANDOM_COLOR:
+            color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
+        self.color = color
+
+    def get_key(self):
+        return self.color.color_string
+
+    def get_scope(self):
+        return self.color.color_string
+
+    def __eq__(self, right):
+        assert isinstance(right, WordHighlight)
+        return self.word == right.word and (self.color == UNSPECIFIED_COLOR or self.color == right.color)
+
+class WordHighlightCollection(object):
+    """Keeps track of the highlighted words"""
+
+    def __init__(self, view):
+        self.color_index = 0
+        self.words = []
+        self.view = view
+
+    def has_word(self, word, color=UNSPECIFIED_COLOR):
+        found_word = self.get_word_highlight(word)
+        if color == UNSPECIFIED_COLOR:
+            return found_word is not None
+        else:
+            return found_word.color == color
+
+    def get_word_highlight(self, word):
+        assert isinstance(word, str)
+        for w in self.words:
+            if w.word == word: return w
+        return None
+
+    def update(self):
+        import re
+        for w in self.words:
+            pattern = w.word
+            escaped_pattern = re.escape(pattern)
+            regions = self.view.find_all(escaped_pattern)
+            self.view.add_regions(w.get_key(), regions, w.get_scope())
+
+        for w in self.words:
+            print("Used word: {}, scope: {}".format(w.word, w.get_scope()))
+
+    # Check if the word exists, then remove it from the stack, otherwise add it
+    def toggle_word(self, word, color=UNSPECIFIED_COLOR):
+        if self.has_word(word):
+            self._remove_word(word)
+        elif self.get_word_highlight(word):
+            self._remove_word(word)
+            self._add_word(word, color)
+        else:
+            self._add_word(word, color)
+
+    def _add_word(self, word, color=UNSPECIFIED_COLOR):
+        assert isinstance(color, ColorType)
+        assert isinstance(word, str)
+        if color == UNSPECIFIED_COLOR:
+            color = NEXT_COLOR
+        self.words.append(WordHighlight(word, color))
+        self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+
+    def _remove_word(self, word, color=UNSPECIFIED_COLOR):
+        assert isinstance(color, ColorType)
+        assert isinstance(word, str)
+        if self.has_word(word, color):
+            self.view.erase_regions(self.get_word_highlight(word).get_key())
+            self.words.remove(WordHighlight(word))
+
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
     Highlights all instances of a specific word that is selected
     """
+    def __init__(self, view):
+        self.view = view
+        self.collection = WordHighlightCollection(view)
+
     # Expand the point to a region that contains a word, or an empty Region if 
     # the point is not placed at a word.
     def expand_to_word(self, point):
@@ -54,6 +147,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 return sublime.Region(0, 0) # Empty region
 
     # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
+    # re.compile(string, re.IGNORECASE)
     def is_case_insensitive_language(self):
         import re
         syntax_file = self.view.settings().get("syntax")
@@ -81,11 +175,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         print("text_selections: " + str(text_selections))
 
         # Find all instances of each selection
-        import re
         for pattern in text_selections:
-            escaped_pattern = re.escape(pattern)
-            regions = self.view.find_all(escaped_pattern)
-            self.view.add_regions('unique_region_key', regions, 'scope.name')
+            self.collection.toggle_word(pattern)
+            self.collection.update()
 
         # TODO:
         # 1. Get a unique color association for each selection
