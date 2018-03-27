@@ -22,7 +22,12 @@ class ColorType(object):
         self.color_string = color_string
 
     def __eq__(self, right):
-        return self.color_string == right.color_string
+        if isinstance(right, str):
+            return self.color_string == right
+        elif isinstance(right, ColorType):
+            return self.color_string == right.color_string
+        else:
+            raise ValueError("Illegal type in comparison")
 
     def __str__(self):
         return self.color_string
@@ -35,11 +40,14 @@ RANDOM_COLOR      = ColorType("RANDOM_COLOR")
 class WordHighlight(object):
     def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
         assert isinstance(word, str)
-        assert isinstance(color, ColorType)
+        if isinstance(color, str):
+            color = ColorType(color)
+        elif not isinstance(color, ColorType):
+            raise ValueError("Invalid color type")
         import random
         self.word = word
         self.match_by_word = match_by_word
-        if color == RANDOM_COLOR:
+        if color is RANDOM_COLOR:
             color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
         self.color = color
 
@@ -59,7 +67,7 @@ class WordHighlight(object):
     def __eq__(self, right):
         if right is None: return False
         assert isinstance(right, WordHighlight)
-        return self.word == right.word and (self.color == UNSPECIFIED_COLOR or self.color == right.color)
+        return self.word == right.word and (self.color is UNSPECIFIED_COLOR or self.color == right.color)
 
     def __str__(self):
         return "<{}:{}>".format(self.word, self.color)
@@ -93,6 +101,12 @@ class WordHighlightCollection(object):
 
         print("Used words: {}".format([str(w) for w in self.words]))
 
+    def color_frequencies(self):
+        freqs = [0]*len(SCOPE_COLORS)
+        for i, c in enumerate(SCOPE_COLORS):
+            freqs[i] = len([1 for w in self.words if (w.color == c)])
+        return freqs
+
     # Check if the word exists, then remove it from the stack, otherwise add it
     def toggle_word(self, word):
         if self.has_word(word):
@@ -105,7 +119,7 @@ class WordHighlightCollection(object):
 
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
-        if word.color == UNSPECIFIED_COLOR:
+        if word.color is UNSPECIFIED_COLOR:
             word.color = NEXT_COLOR
         self.words.append(word)
         self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
@@ -124,6 +138,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         self.collection = WordHighlightCollection(view)
+        self.collection.toggle_word(WordHighlight("test1", False, color="word_highlighter.color1"))
+        self.collection.toggle_word(WordHighlight("test2", False, color="word_highlighter.color5"))
+        print("Color frequency: {}".format(self.collection.color_frequencies()))
 
     # Expand the point to a region that contains a word, or an empty Region if 
     # the point is not placed at a word.
