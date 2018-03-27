@@ -24,20 +24,31 @@ class ColorType(object):
     def __eq__(self, right):
         return self.color_string == right.color_string
 
+    def __str__(self):
+        return self.color_string
+
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
 NEXT_COLOR        = ColorType("NEXT_COLOR")
 RANDOM_COLOR      = ColorType("RANDOM_COLOR")
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
-    def __init__(self, word, color=UNSPECIFIED_COLOR):
+    def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
         assert isinstance(word, str)
         assert isinstance(color, ColorType)
         import random
         self.word = word
+        self.match_by_word = match_by_word
         if color == RANDOM_COLOR:
             color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
         self.color = color
+
+    def get_regex(self):
+        import re
+        regex = re.escape(self.word)
+        if self.match_by_word:
+            regex = '\\b' + regex + '\\b'
+        return regex
 
     def get_key(self):
         return self.color.color_string
@@ -46,8 +57,15 @@ class WordHighlight(object):
         return self.color.color_string
 
     def __eq__(self, right):
+        if right is None: return False
         assert isinstance(right, WordHighlight)
         return self.word == right.word and (self.color == UNSPECIFIED_COLOR or self.color == right.color)
+
+    def __str__(self):
+        return "<{}:{}>".format(self.word, self.color)
+
+    def __hash__(self):
+        return hash(str(self))
 
 class WordHighlightCollection(object):
     """Keeps track of the highlighted words"""
@@ -57,54 +75,47 @@ class WordHighlightCollection(object):
         self.words = []
         self.view = view
 
-    def has_word(self, word, color=UNSPECIFIED_COLOR):
-        found_word = self.get_word_highlight(word)
-        if color == UNSPECIFIED_COLOR:
-            return found_word is not None
-        else:
-            return found_word.color == color
+    def has_word(self, word):
+        return word in self.words
 
     def get_word_highlight(self, word):
-        assert isinstance(word, str)
+        assert isinstance(word, WordHighlight)
         for w in self.words:
-            if w.word == word: return w
+            if w.word == word.word: return w
         return None
 
     def update(self):
         import re
         for w in self.words:
-            pattern = w.word
-            escaped_pattern = re.escape(pattern)
-            regions = self.view.find_all(escaped_pattern)
+            pattern = w.get_regex()
+            regions = self.view.find_all(pattern)
             self.view.add_regions(w.get_key(), regions, w.get_scope())
 
-        for w in self.words:
-            print("Used word: {}, scope: {}".format(w.word, w.get_scope()))
+        print("Used words: {}".format([str(w) for w in self.words]))
 
     # Check if the word exists, then remove it from the stack, otherwise add it
-    def toggle_word(self, word, color=UNSPECIFIED_COLOR):
+    def toggle_word(self, word):
         if self.has_word(word):
             self._remove_word(word)
         elif self.get_word_highlight(word):
             self._remove_word(word)
-            self._add_word(word, color)
+            self._add_word(word)
         else:
-            self._add_word(word, color)
+            self._add_word(word)
 
-    def _add_word(self, word, color=UNSPECIFIED_COLOR):
-        assert isinstance(color, ColorType)
-        assert isinstance(word, str)
-        if color == UNSPECIFIED_COLOR:
-            color = NEXT_COLOR
-        self.words.append(WordHighlight(word, color))
+    def _add_word(self, word):
+        assert isinstance(word, WordHighlight)
+        if word.color == UNSPECIFIED_COLOR:
+            word.color = NEXT_COLOR
+        self.words.append(word)
         self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
 
-    def _remove_word(self, word, color=UNSPECIFIED_COLOR):
-        assert isinstance(color, ColorType)
-        assert isinstance(word, str)
-        if self.has_word(word, color):
-            self.view.erase_regions(self.get_word_highlight(word).get_key())
-            self.words.remove(WordHighlight(word))
+    def _remove_word(self, word):
+        assert isinstance(word, WordHighlight)
+        if self.has_word(word):
+            w = self.get_word_highlight(word)
+            self.view.erase_regions(w.get_key())
+            self.words.remove(w)
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
@@ -165,23 +176,20 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 txt = self.view.substr(r)
                 if txt != '':
                     print("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(txt)
+                    text_selections.append(WordHighlight(txt, match_by_word=True))
             # Keep non-empty selections as-is
             else:
-                text_selections.append(self.view.substr(s))
+                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False))
         # Get unique items
         text_selections = list(set(text_selections))
 
         print("text_selections: " + str(text_selections))
 
         # Find all instances of each selection
-        for pattern in text_selections:
-            self.collection.toggle_word(pattern)
+        for w in text_selections:
+            self.collection.toggle_word(w)
             self.collection.update()
 
         # TODO:
         # 1. Get a unique color association for each selection
-        # 2. Find all of the matching words
-        # 3. Use add_region() to set the scope for the regions
-        # 4. Save the words that have been highlighter
-        # 5. Update the highlighted regions if they are edited
+        # 2. Update the highlighted regions if they are edited
