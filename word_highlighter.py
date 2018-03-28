@@ -111,9 +111,6 @@ class WordHighlightCollection(object):
     def toggle_word(self, word):
         if self.has_word(word):
             self._remove_word(word)
-        elif self.get_word_highlight(word):
-            self._remove_word(word)
-            self._add_word(word)
         else:
             self._add_word(word)
 
