@@ -1,2 +1,3 @@
 [
+	{"keys": ["alt+k", "h", "w"], "command": "word_highlighter_highlight_instances_of_selection",       "context": [{"key": "selector", "operand": "source"}] },
 ]
