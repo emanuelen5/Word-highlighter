@@ -141,6 +141,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         self.collection.toggle_word(WordHighlight("test1", False, color="word_highlighter.color1"))
         self.collection.toggle_word(WordHighlight("test2", False, color="word_highlighter.color5"))
         print("Color frequency: {}".format(self.collection.color_frequencies()))
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        color_mappings = settings.get("color_mappings", default=[])
+        print("Color mappings from settings: {}".format(color_mappings))
 
     # Expand the point to a region that contains a word, or an empty Region if 
     # the point is not placed at a word.
