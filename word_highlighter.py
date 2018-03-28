@@ -79,7 +79,6 @@ class WordHighlightCollection(object):
     """Keeps track of the highlighted words"""
 
     def __init__(self, view):
-        self.color_index = 0
         self.words = []
         self.view = view
 
@@ -114,12 +113,15 @@ class WordHighlightCollection(object):
         else:
             self._add_word(word)
 
+    def get_next_color(self):
+        min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
+        return SCOPE_COLORS[min_ind]
+
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
-        if word.color is UNSPECIFIED_COLOR:
-            word.color = NEXT_COLOR
+        if word.color is UNSPECIFIED_COLOR or word.color is NEXT_COLOR:
+            word.color = self.get_next_color()
         self.words.append(word)
-        self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
 
     def _remove_word(self, word):
         assert isinstance(word, WordHighlight)
