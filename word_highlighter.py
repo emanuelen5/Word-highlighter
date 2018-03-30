@@ -39,16 +39,17 @@ RANDOM_COLOR      = ColorType("RANDOM_COLOR")
 # Instances that combine a word with a color scope
 class WordHighlight(object):
     def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
+        import random
+        if color is RANDOM_COLOR:
+            color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
+
         assert isinstance(word, str)
         if isinstance(color, str):
             color = ColorType(color)
         elif not isinstance(color, ColorType):
             raise ValueError("Invalid color type")
-        import random
         self.word = word
         self.match_by_word = match_by_word
-        if color is RANDOM_COLOR:
-            color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
         self.color = color
 
     def get_regex(self):
@@ -63,6 +64,11 @@ class WordHighlight(object):
 
     def get_scope(self):
         return self.color.color_string
+
+    def set_color(self, color):
+        if not isinstance(color, ColorType):
+            raise ValueError("Invalid type of color. Got '{}'. Should be string or ColorType".format(type(color)))
+        self.color = color
 
     def __eq__(self, right):
         if right is None: return False
@@ -115,12 +121,12 @@ class WordHighlightCollection(object):
 
     def get_next_color(self):
         min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
-        return SCOPE_COLORS[min_ind]
+        return ColorType(SCOPE_COLORS[min_ind])
 
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
         if word.color is UNSPECIFIED_COLOR or word.color is NEXT_COLOR:
-            word.color = self.get_next_color()
+            word.set_color(self.get_next_color())
         self.words.append(word)
 
     def _remove_word(self, word):
@@ -137,8 +143,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         self.collection = WordHighlightCollection(view)
-        self.collection.toggle_word(WordHighlight("test1", False, color="word_highlighter.color1"))
-        self.collection.toggle_word(WordHighlight("test2", False, color="word_highlighter.color5"))
+        for i in range(len(SCOPE_COLORS)):
+            self.collection._add_word(WordHighlight("lsajfdljasljdf", True))
+        self.collection.update()
         print("Color frequency: {}".format(self.collection.color_frequencies()))
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         color_mappings = settings.get("color_mappings", default=[])
@@ -207,7 +214,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         # Find all instances of each selection
         for w in text_selections:
             self.collection.toggle_word(w)
-            self.collection.update()
+        self.collection.update()
 
         # TODO:
         # 1. Get a unique color association for each selection
