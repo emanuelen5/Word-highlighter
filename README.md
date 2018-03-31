@@ -47,9 +47,26 @@ The snippet above is sufficient for simple highlights (paste into the Sublime te
 ```
 
 #### Color scheme content
+Locations of XML nodes are here described using [XPath][Wikipedia XPath page].
+
+##### Global color definitions
+Located under:
+
+```xpath
+/plist/dict/key[contains(text(), 'settings')]/following-sibling::node()/dict/key[contains(text(), 'settings')]/following-sibling::node()
+```
+
+##### Scope color definitions
+We need to add another dict containing the mapping for our custom scopes that we define. They are located in:
+
+```xpath
+/plist/dict/key[contains(text(), 'settings')]/following-sibling::node()
+```
+
 [Color scheme reference][Color scheme reference: Scope]
 
 [Color scheme reference: Scope]: http://docs.sublimetext.info/en/latest/reference/color_schemes.html#scoped-settings
+[Wikipedia XPath page]: https://en.wikipedia.org/wiki/XPath
 
 ## Running python code
 See the Sublime text guides for [plugins][Sublime Text: Plugins] together with the [API][Sublime text API reference].
@@ -57,6 +74,10 @@ See the Sublime text guides for [plugins][Sublime Text: Plugins] together with t
 Implement a class that inherits `sublime_plugin.TextCommand` and implements a `run` function, as below:
 
 ```python
+# Other code is run once upon load
+init_variable = 0
+
+# Instantiated for each view/buffer
 class vhdlModeInsertCommentLine(sublime_plugin.TextCommand):
   # Run once upon load of each buffer
   def __init__(self, view):
