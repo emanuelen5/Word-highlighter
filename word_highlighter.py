@@ -1,8 +1,27 @@
 import sublime
 import sublime_plugin
+from xml.etree import ElementTree as ET
 
 # Add some base colors to use for selections (perhaps read from settings file)
 SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
+
+def element_with_text(key, text):
+    return ET.Element(key, text=text)
+
+def create_colorscheme_scope_settings_xml(settings):
+    valid_settings = ["background", "foreground"]
+    root = ET.Element("dict")
+    for (key_name, color_string) in enumerate(settings):
+        if key_name not in valid_settings: raise ValueError("{} is not a valid setting for a scope".format(key_name))
+        root.append(element_with_text("key", key_name))
+        root.append(element_with_text("string", color_string))
+    return root
+
+def create_colorscheme_scope_xml(name, scope, settings={}):
+    root = ET.Element("dict")
+    ET.SubElement()
+    root.append(create_colorscheme_scope_settings_xml(settings))
+    return root
 
 # Check that select bits are set
 def bits_set(value, *bits):
