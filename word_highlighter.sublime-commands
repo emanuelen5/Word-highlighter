@@ -1,6 +1,10 @@
 [
-  {
-    "caption": "Highlight instances of selection", 
-    "command": "word_highlighter_highlight_instances_of_selection"
-  },
+	{
+		"caption": "Test Word Highlighter",
+		"command": "test_word_highlighter"
+	},
+	{
+		"caption": "Highlight instances of selection", 
+		"command": "word_highlighter_highlight_instances_of_selection"
+	},
 ]

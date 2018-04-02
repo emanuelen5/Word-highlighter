@@ -238,3 +238,8 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         # TODO:
         # 1. Get a unique color association for each selection
         # 2. Update the highlighted regions if they are edited
+
+class TestWordHighlighterCommand(sublime_plugin.ApplicationCommand):
+    def run(self):
+        from .tests import word_highlighter_tests
+        word_highlighter_tests.main()
