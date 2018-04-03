@@ -78,15 +78,21 @@ Implement a class that inherits `sublime_plugin.TextCommand` and implements a `r
 init_variable = 0
 
 # Instantiated for each view/buffer
-class vhdlModeInsertCommentLine(sublime_plugin.TextCommand):
+class wordHighlighterCommand(sublime_plugin.TextCommand):
   # Run once upon load of each buffer
   def __init__(self, view):
     self.view = view
+    buffer_specific_value = {}
+    settings = view.settings()
+    # This value can be read from other processes in the same buffer
+    settings.set("word_highlighter", buffer_specific_value)
 
   # Run when the command is called
   def run(self, edit):
     pass
 ```
+
+The `view.settings()` object can be used for passing data between different commands in the same buffer.
 
 [Sublime Text: Plugins]: http://docs.sublimetext.info/en/latest/extensibility/plugins.html
 
