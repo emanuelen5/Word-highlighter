@@ -136,20 +136,43 @@ class WordHighlightCollection(object):
             self.view.erase_regions(w.get_key())
             self.words.remove(w)
 
+    def dumps(self):
+        import pickle
+        return pickle.dumps(self)
+
+    @classmethod
+    def loads(cls, s):
+        import pickle
+        instance = pickle.loads(s)
+        assert isinstance(instance, cls)
+        return instance
+
+# Updates the collection for the object
+def update_collection_wrapper(function):
+    def wrap(self, *args, **kwargs):
+        s = self.view.settings()
+        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
+        ret_value = function(self, *args, **kwargs)
+        s.set("wordhighlighter_collection", self.collection.dumps())
+        return ret_value
+    return wrap
+
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
     Highlights all instances of a specific word that is selected
     """
     def __init__(self, view):
         self.view = view
-        self.collection = WordHighlightCollection(view)
+        collection = WordHighlightCollection(view)
         for i in range(len(SCOPE_COLORS)):
-            self.collection._add_word(WordHighlight("lsajfdljasljdf", True))
-        self.collection.update()
-        print("Color frequency: {}".format(self.collection.color_frequencies()))
+            collection._add_word(WordHighlight("lsajfdljasljdf", True))
+        collection.update()
+        print("Color frequency: {}".format(collection.color_frequencies()))
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         color_mappings = settings.get("color_mappings", default=[])
         print("Color mappings from settings: {}".format(color_mappings))
+        # Save the instance globally for the buffer
+        self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
     # Expand the point to a region that contains a word, or an empty Region if 
     # the point is not placed at a word.
@@ -192,6 +215,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
         return matches_case_insensitive_language
 
+    @update_collection_wrapper
     def run(self, edit):
         text_selections = []
         for s in self.view.sel():
