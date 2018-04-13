@@ -143,7 +143,7 @@ class WordHighlightCollection(object):
     @classmethod
     def loads(cls, s):
         import pickle
-        instance = pickle.loads(s)
+        instance = pickle.loads(bytes(s))
         assert isinstance(instance, cls)
         return instance
 
@@ -156,6 +156,15 @@ def update_collection_wrapper(function):
         s.set("wordhighlighter_collection", self.collection.dumps())
         return ret_value
     return wrap
+
+class update_words_event(sublime_plugin.ViewEventListener):
+    '''
+    Runs an update of the
+    '''
+    @update_collection_wrapper
+    def on_modified(self):
+        print("Running on modification")
+        self.collection.update()
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
