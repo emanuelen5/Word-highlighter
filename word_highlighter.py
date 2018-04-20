@@ -136,6 +136,10 @@ class WordHighlightCollection(object):
             self.view.erase_regions(w.get_key())
             self.words.remove(w)
 
+    def clear(self):
+        for w in self.words:
+            self._remove_word(w)
+
     def dumps(self):
         import pickle
         return pickle.dumps(self)
@@ -165,6 +169,14 @@ class update_words_event(sublime_plugin.ViewEventListener):
     def on_modified(self):
         print("Running on modification")
         self.collection.update()
+
+class wordHighlighterClearInstances(sublime_plugin.TextCommand):
+    def __init__(self, view):
+        self.view = view
+
+    @update_collection_wrapper
+    def run(self, edit):
+        self.collection.clear()
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
