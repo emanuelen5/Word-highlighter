@@ -137,7 +137,8 @@ class WordHighlightCollection(object):
             self.words.remove(w)
 
     def clear(self):
-        for w in self.words:
+        words = [w for w in self.words]
+        for w in words:
             self._remove_word(w)
 
     def dumps(self):
