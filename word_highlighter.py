@@ -1,6 +1,14 @@
 import sublime
 import sublime_plugin
 
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+log_file = os.path.join(dir_path, "word_highlighter.log")
+
+import logging
+logging.basicConfig(filename=log_file, format='%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s', filemode='w', level=logging.DEBUG)
+logging.info("Starting module")
+
 # Add some base colors to use for selections (perhaps read from settings file)
 SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
 
@@ -104,7 +112,7 @@ class WordHighlightCollection(object):
             regions = self.view.find_all(pattern)
             self.view.add_regions(w.get_key(), regions, w.get_scope())
 
-        print("Used words: {}".format([str(w) for w in self.words]))
+        logging.debug("Used words: {}".format([str(w) for w in self.words]))
 
     def color_frequencies(self):
         freqs = [0]*len(SCOPE_COLORS)
@@ -168,7 +176,7 @@ class update_words_event(sublime_plugin.ViewEventListener):
     '''
     @update_collection_wrapper
     def on_modified(self):
-        print("Running on modification")
+        logging.debug("Running on modification")
         self.collection.update()
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand):
@@ -189,10 +197,10 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         for i in range(len(SCOPE_COLORS)):
             collection._add_word(WordHighlight("lsajfdljasljdf", True))
         collection.update()
-        print("Color frequency: {}".format(collection.color_frequencies()))
+        logging.info("Color frequency: {}".format(collection.color_frequencies()))
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         color_mappings = settings.get("color_mappings", default=[])
-        print("Color mappings from settings: {}".format(color_mappings))
+        logging.info("Color mappings from settings: {}".format(color_mappings))
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
@@ -202,13 +210,13 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         classification = self.view.classify(point)
         # If start of word, expand right to end of word
         if bits_set(classification, sublime.CLASS_WORD_START):
-            print("At start of word!")
+            logging.debug("At start of word!")
             back_stop = point
             forward_stop = self.view.find_by_class(point, forward=True, classes=sublime.CLASS_WORD_END)
             return sublime.Region(back_stop, forward_stop)
         # If end of word, expand left to start of word
         elif bits_set(classification, sublime.CLASS_WORD_END):
-            print("At end of word!")
+            logging.debug("At end of word!")
             back_stop = self.view.find_by_class(point, forward=False, classes=sublime.CLASS_WORD_START)
             forward_stop = point
             return sublime.Region(back_stop, forward_stop)
@@ -225,7 +233,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 # Valid word!
                 return r
             else:
-                print("Expanded word is invalid: '{}'".format(self.view.substr(r)))
+                logging.debug("Expanded word is invalid: '{}'".format(self.view.substr(r)))
                 return sublime.Region(0, 0) # Empty region
 
     # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
@@ -247,7 +255,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 # Append the word if it is not empty
                 txt = self.view.substr(r)
                 if txt != '':
-                    print("Expanded word is valid: '{}'".format(txt))
+                    logging.debug("Expanded word is valid: '{}'".format(txt))
                     text_selections.append(WordHighlight(txt, match_by_word=True))
             # Keep non-empty selections as-is
             else:
@@ -255,7 +263,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         # Get unique items
         text_selections = list(set(text_selections))
 
-        print("text_selections: " + str(text_selections))
+        logging.debug("text_selections: " + str(text_selections))
 
         # Find all instances of each selection
         for w in text_selections:
