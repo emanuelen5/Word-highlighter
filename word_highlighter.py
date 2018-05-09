@@ -204,7 +204,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
-    # Expand the point to a region that contains a word, or an empty Region if 
+    # Expand the point to a region that contains a word, or an empty Region if
     # the point is not placed at a word.
     def expand_to_word(self, point):
         classification = self.view.classify(point)
@@ -269,7 +269,3 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         for w in text_selections:
             self.collection.toggle_word(w)
         self.collection.update()
-
-        # TODO:
-        # 1. Get a unique color association for each selection
-        # 2. Update the highlighted regions if they are edited
