@@ -112,8 +112,6 @@ class WordHighlightCollection(object):
             regions = self.view.find_all(pattern)
             self.view.add_regions(w.get_key(), regions, w.get_scope())
 
-        logging.debug("Used words: {}".format([str(w) for w in self.words]))
-
     def color_frequencies(self):
         freqs = [0]*len(SCOPE_COLORS)
         for i, c in enumerate(SCOPE_COLORS):
@@ -126,6 +124,7 @@ class WordHighlightCollection(object):
             self._remove_word(word)
         else:
             self._add_word(word)
+        logging.debug("Used words: {}".format([str(w) for w in self.words]))
 
     def get_next_color(self):
         min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
@@ -148,6 +147,7 @@ class WordHighlightCollection(object):
         words = [w for w in self.words]
         for w in words:
             self._remove_word(w)
+        logging.debug("Clearing all highlighted words")
 
     def dumps(self):
         import pickle
@@ -176,7 +176,6 @@ class update_words_event(sublime_plugin.ViewEventListener):
     '''
     @update_collection_wrapper
     def on_modified(self):
-        logging.debug("Running on modification")
         self.collection.update()
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand):
