@@ -1,6 +1,8 @@
 import sublime
 import sublime_plugin
 
+import threading
+
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 log_file = os.path.join(dir_path, "word_highlighter.log")
@@ -172,11 +174,26 @@ def update_collection_wrapper(function):
 
 class update_words_event(sublime_plugin.ViewEventListener):
     '''
-    Runs an update of the
+    Runs an update of the highlights
     '''
+    def __init__(self, view):
+        self.view = view
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        self.debounce_time = settings.get("debounce")
+        self.debouncer = None
+        logging.debug("Debounce time: {}".format(self.debounce_time))
+
     @update_collection_wrapper
-    def on_modified(self):
+    def update_highlighting(self):
+        logging.debug("Updating highlighting")
         self.collection.update()
+
+    def on_modified(self):
+        if self.debouncer is not None:
+            self.debouncer.cancel()
+        def update_highlighting_f():
+            self.update_highlighting()
+        self.debouncer = threading.Timer(self.debounce_time, update_highlighting_f).start()
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def __init__(self, view):

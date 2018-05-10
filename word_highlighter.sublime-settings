@@ -1,2 +1,4 @@
 {
+	// Time from modification until the highlighting is updated [seconds]
+	"debounce": 0.1,
 }
