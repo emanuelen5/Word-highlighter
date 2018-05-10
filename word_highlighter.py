@@ -193,13 +193,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         collection = WordHighlightCollection(view)
-        for i in range(len(SCOPE_COLORS)):
-            collection._add_word(WordHighlight("lsajfdljasljdf", True))
-        collection.update()
-        logging.info("Color frequency: {}".format(collection.color_frequencies()))
         settings = sublime.load_settings("word_highlighter.sublime-settings")
-        color_mappings = settings.get("color_mappings", default=[])
-        logging.info("Color mappings from settings: {}".format(color_mappings))
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
