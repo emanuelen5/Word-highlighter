@@ -203,13 +203,30 @@ class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def run(self, edit):
         self.collection.clear()
 
+def restore_collection(view):
+    collection = WordHighlightCollection(view)
+    for s in SCOPE_COLORS:
+        regions = view.get_regions(s)
+        unique_words = set()
+        if len(regions):
+            print("{} is used".format(s))
+            for r in regions:
+                word = view.substr(r)
+                unique_words |= set((word,))
+        for w in unique_words:
+            print(w)
+            # TODO: Check if matches word exactly
+            collection._add_word(WordHighlight(w, True, color=s))
+    collection.update()
+    return collection
+
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
     Highlights all instances of a specific word that is selected
     """
     def __init__(self, view):
         self.view = view
-        collection = WordHighlightCollection(view)
+        collection = restore_collection(view)
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
