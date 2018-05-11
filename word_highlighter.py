@@ -194,7 +194,8 @@ class update_words_event(sublime_plugin.ViewEventListener):
             self.debouncer.cancel()
         def update_highlighting_f():
             self.update_highlighting()
-        self.debouncer = threading.Timer(self.debounce_time, update_highlighting_f).start()
+        self.debouncer = threading.Timer(self.debounce_time, update_highlighting_f)
+        self.debouncer.start()
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def __init__(self, view):
