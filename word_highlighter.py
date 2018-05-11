@@ -178,6 +178,7 @@ class update_words_event(sublime_plugin.ViewEventListener):
     '''
     def __init__(self, view):
         self.view = view
+        logging.info("Initializing updater instance...")
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         self.debounce_time = settings.get("debounce")
         self.debouncer = None
@@ -209,15 +210,13 @@ def restore_collection(view):
         regions = view.get_regions(s)
         unique_words = set()
         if len(regions):
-            print("{} is used".format(s))
             for r in regions:
                 word = view.substr(r)
                 whole_word = view.substr(expand_to_word(view, r.begin()))
                 matches_whole_word = (word == whole_word)
                 unique_words |= set(((word, matches_whole_word), ))
         for w in unique_words:
-            print(w)
-            # TODO: Check if matches word exactly
+            logging.info("Restoring word: '{}'".format(w[0]))
             collection._add_word(WordHighlight(*w, color=s))
     collection.update()
     return collection
