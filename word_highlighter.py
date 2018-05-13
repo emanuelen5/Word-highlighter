@@ -110,10 +110,14 @@ class WordHighlightCollection(object):
 
     def update(self):
         import re
-        for w in self.words:
-            pattern = w.get_regex()
-            regions = self.view.find_all(pattern)
-            self.view.add_regions(w.get_key(), regions, w.get_scope())
+        keys = set((w.get_key() for w in self.words))
+        for k in keys:
+            words = [w for w in self.words if w.get_key() == k]
+            regions = []
+            for w in words:
+                pattern = w.get_regex()
+                regions += self.view.find_all(pattern)
+            self.view.add_regions(k, regions, k)
 
     def color_frequencies(self):
         freqs = [0]*len(SCOPE_COLORS)
