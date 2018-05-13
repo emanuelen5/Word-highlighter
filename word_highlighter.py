@@ -65,6 +65,7 @@ class WordHighlight(object):
     def get_regex(self):
         import re
         regex = re.escape(self.word)
+        regex = regex.replace("\\'", "'")
         if self.match_by_word:
             regex = '\\b' + regex + '\\b'
         return regex
