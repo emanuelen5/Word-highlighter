@@ -7,13 +7,22 @@ class TestHighlighting(unittest.TestCase):
         self.view = self.window.new_file()
         self.view.set_scratch(True)
         self.error_list = []
+        self.view.run_command("word_highlighter_clear_instances")
 
     def tearDown(self):
         self.view.close()
 
     def check_character(self, c):
         self.view.run_command("overwrite", {"characters": c})
-        raise AssertionError("Not implemented yet")
+        # Select the only character in the buffer
+        s = self.view.sel()
+        s.clear()
+        s.add(sublime.Region(0,1))
+        # Highlight the selection
+        self.view.run_command("word_highlighter_highlight_instances_of_selection")
+        regions = self.view.get_regions("word_highlighter.color0")
+        self.assertEqual([sublime.Region(0,1)], list(regions), "The first word should be highlighted")
+        self.view.run_command("word_highlighter_clear_instances")
 
     def test_highlight_characters(self):
         chars = [chr(i) for i in range(0x20, 0x7f)]
