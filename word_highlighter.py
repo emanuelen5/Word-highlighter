@@ -65,7 +65,11 @@ class WordHighlight(object):
     def get_regex(self):
         import re
         regex = re.escape(self.word)
+        # Some characters are "too" escaped for add_region to find them
         regex = regex.replace("\\'", "'")
+        regex = regex.replace("\\`", "`")
+        regex = regex.replace("\\<", "<")
+        regex = regex.replace("\\>", ">")
         if self.match_by_word:
             regex = '\\b' + regex + '\\b'
         return regex
