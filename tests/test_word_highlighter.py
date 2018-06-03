@@ -26,18 +26,3 @@ class TestHighlighting(unittest.TestCase):
             except AssertionError as e:
                 self.error_list.append("{} : Highlighting for '{}' ".format(e, c))
 
-class TestWordHighlighterAddCharacterCommand(sublime_plugin.TextCommand):
-    def run(edit, c):
-        print("TestWordHighlighterAddCharacterCommand.run()")
-        self.view.insert(edit, 0, c)
-
-def create_test_suite():
-    test_cases = (TestHighlighting, )
-    suite = unittest.TestSuite()
-    for test_class in test_cases:
-        tests = unittest.TestLoader().loadTestsFromTestCase(test_class)
-        suite.addTests(tests)
-    return suite
-
-def main():
-    unittest.TextTestRunner().run(create_test_suite())

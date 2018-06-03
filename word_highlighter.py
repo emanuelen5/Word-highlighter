@@ -303,11 +303,3 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         for w in text_selections:
             self.collection.toggle_word(w)
         self.collection.update()
-
-class TestWordHighlighterCommand(sublime_plugin.ApplicationCommand):
-    def run(self):
-        from .tests import word_highlighter_tests
-        # We need to manually reload since it is not automatically done for files in subdirectories
-        import imp
-        imp.reload(word_highlighter_tests)
-        word_highlighter_tests.main()
