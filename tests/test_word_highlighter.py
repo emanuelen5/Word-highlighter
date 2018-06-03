@@ -1,5 +1,4 @@
 import unittest
-
 import sublime
 
 class TestHighlighting(unittest.TestCase):
