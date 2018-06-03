@@ -1,7 +1,6 @@
 import unittest
-#from ..word_highlighter import ...
+
 import sublime
-import sublime_plugin
 
 class TestHighlighting(unittest.TestCase):
     def setUp(self):
@@ -12,17 +11,26 @@ class TestHighlighting(unittest.TestCase):
 
     def tearDown(self):
         self.view.close()
-        self.assertEqual([], self.error_list)
+        self.maxDiff = None
+        self.assertEqual([], self.error_list, "List of errors during run")
 
     def check_character(self, c):
-        self.view.run_command("test_word_highlighter_add_character", c)
-        self.assertTrue(False, "Not implemented yet")
+        self.view.run_command("overwrite", {"characters": c})
+        raise AssertionError("Not implemented yet")
 
     def test_highlight_characters(self):
-        chars = ["<", ">", "'"]
+        chars = [chr(i) for i in range(0x20, 0x7f)]
+        chars += ['\r', '\n']
         for i, c in enumerate(chars):
             try:
                 self.check_character(c)
             except AssertionError as e:
-                self.error_list.append("{} : Highlighting for '{}' ".format(e, c))
+                self.error_list.append("Highlighting for '{}' failed - {}".format(c, e))
 
+## For testing internal functions
+import sys
+version = sublime.version()
+if version < '3000':
+    word_highlighter = sys.modules["word_highlighter"]
+else:
+    word_highlighter = sys.modules["Word-highlighter.word_highlighter"]
