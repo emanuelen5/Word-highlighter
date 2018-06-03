@@ -6,7 +6,7 @@ version = sublime.version()
 
 
 # for testing sublime command
-class TestHelloWorld(TestCase):
+class TestWordHighlighter(TestCase):
 
     def setUp(self):
         self.view = sublime.active_window().new_file()
@@ -30,13 +30,13 @@ class TestHelloWorld(TestCase):
     # we have to do primitive skipping
     if version >= '3000':
         def test_hello_world_st3(self):
-            self.view.run_command("hello_world")
+            self.setText("hello world")
             first_row = self.getRow(0)
             self.assertEqual(first_row, "hello world")
 
     def test_hello_world(self):
         self.setText("new ")
-        self.view.run_command("hello_world")
+        self.setText("hello world")
         first_row = self.getRow(0)
         self.assertEqual(first_row, "new hello world")
 
@@ -44,14 +44,7 @@ class TestHelloWorld(TestCase):
 # for testing internal function
 if version < '3000':
     # st2
-    helloworld = sys.modules["helloworld"]
+    Word_Highlighter = sys.modules["word_highlighter"]
 else:
     # st3
-    helloworld = sys.modules["UnitTesting-example.helloworld"]
-
-
-class TestFunctions(TestCase):
-
-    def test_foo(self):
-        x = helloworld.foo(1)
-        self.assertEqual(x, 2)
+    Word_Highlighter = sys.modules["Word Highlighter.word_highlighter"]
