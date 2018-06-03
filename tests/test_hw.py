@@ -47,4 +47,4 @@ if version < '3000':
     Word_Highlighter = sys.modules["word_highlighter"]
 else:
     # st3
-    Word_Highlighter = sys.modules["Word Highlighter.word_highlighter"]
+    Word_Highlighter = sys.modules["Word-highlighter.word_highlighter"]
