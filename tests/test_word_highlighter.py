@@ -10,8 +10,6 @@ class TestHighlighting(unittest.TestCase):
 
     def tearDown(self):
         self.view.close()
-        self.maxDiff = None
-        self.assertEqual([], self.error_list, "List of errors during run")
 
     def check_character(self, c):
         self.view.run_command("overwrite", {"characters": c})
@@ -24,7 +22,9 @@ class TestHighlighting(unittest.TestCase):
             try:
                 self.check_character(c)
             except AssertionError as e:
-                self.error_list.append("Highlighting for '{}' failed - {}".format(c, e))
+                self.error_list.append(c)
+        self.maxDiff = None
+        self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
 
 ## For testing internal functions
 import sys
