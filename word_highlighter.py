@@ -51,7 +51,7 @@ class WordHighlight(object):
     def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
         import random
         if color is RANDOM_COLOR:
-            color = SCOPE_COLORS[random.rand(len(SCOPE_COLORS))]
+            color = random.choice(SCOPE_COLORS)
 
         assert isinstance(word, str)
         if isinstance(color, str):
@@ -104,7 +104,7 @@ class WordHighlightCollection(object):
         self.view = view
 
     def has_word(self, word):
-        return word in self.words
+        return word.word in [w.word for w in self.words]
 
     def get_word_highlight(self, word):
         assert isinstance(word, WordHighlight)
@@ -270,7 +270,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         collection = restore_collection(view)
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        self.settings = sublime.load_settings("word_highlighter.sublime-settings")
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
@@ -285,6 +285,10 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
 
     @update_collection_wrapper
     def run(self, edit):
+        if self.settings.get("next_word_color") == "CYCLIC_EVEN":
+            next_word_color = NEXT_COLOR
+        else:
+            next_word_color = RANDOM_COLOR
         text_selections = []
         for s in self.view.sel():
             # Expand empty selections to words
@@ -294,10 +298,10 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 txt = self.view.substr(r)
                 if txt != '':
                     logging.debug("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(WordHighlight(txt, match_by_word=True))
+                    text_selections.append(WordHighlight(txt, color=next_word_color, match_by_word=True))
             # Keep non-empty selections as-is
             else:
-                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False))
+                text_selections.append(WordHighlight(self.view.substr(s), color=next_word_color, match_by_word=False))
         # Get unique items
         text_selections = list(set(text_selections))
 
