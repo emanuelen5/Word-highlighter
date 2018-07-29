@@ -295,8 +295,8 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
             next_color = ColorType(SCOPE_COLORS[min_ind])
         elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
             min_frequency = min((v,ind) for ind,v in enumerate(self.collection.color_frequencies()))[0]
-            min_frequency_colors = [SCOPE_COLORS[ind] for ind,f in enumerate(self.collection.color_frequencies()) if f == min_frequency]
-            next_color = ColorType(random.choice(min_frequency_colors))
+            min_frequency_indices = [ind for ind,f in enumerate(self.collection.color_frequencies()) if f == min_frequency]
+            next_color = ColorType(SCOPE_COLORS[random.choice(min_frequency_indices)])
         elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
             next_color = ColorType(SCOPE_COLORS[self.color_index])
             self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
