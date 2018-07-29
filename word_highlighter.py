@@ -155,7 +155,10 @@ class WordHighlightCollection(object):
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
         if word.color is UNSPECIFIED_COLOR:
-            word.set_color(self.get_next_word_color())
+            settings = sublime.load_settings("word_highlighter.sublime-settings")
+            color_picking_scheme = get_color_picking_scheme(settings.get("color_picking_scheme"))
+            logging.debug("Chosen color scheme: {}".format(color_picking_scheme))
+            word.set_color(self.get_next_word_color(color_picking_scheme))
         self.words.append(word)
 
     def _remove_word(self, word):
@@ -304,9 +307,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
 
     @update_collection_wrapper
     def run(self, edit):
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
-        color_picking_scheme = get_color_picking_scheme(settings.get("color_picking_scheme"))
-        logging.debug("Chosen color scheme: {}".format(color_picking_scheme))
         text_selections = []
         for s in self.view.sel():
             # Expand empty selections to words
