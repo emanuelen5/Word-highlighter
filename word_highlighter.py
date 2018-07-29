@@ -43,7 +43,6 @@ class ColorType(object):
         return self.color_string
 
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
-NEXT_COLOR        = ColorType("NEXT_COLOR")
 color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN"]}
 
 # Instances that combine a word with a color scope
@@ -98,6 +97,7 @@ class WordHighlightCollection(object):
     def __init__(self, view):
         self.words = []
         self.view = view
+        self.color_index = 0
 
     def has_word(self, word):
         return word.word in [w.word for w in self.words]
@@ -125,6 +125,25 @@ class WordHighlightCollection(object):
             freqs[i] = len([1 for w in self.words if (w.color == c)])
         return freqs
 
+    def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
+        import random
+        if color_picking_scheme is get_color_picking_scheme("RANDOM"):
+            next_color = ColorType(random.choice(SCOPE_COLORS))
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+            min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
+            next_color = ColorType(SCOPE_COLORS[min_ind])
+        elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
+            min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
+            min_frequency_indices = [ind for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
+            next_color = ColorType(SCOPE_COLORS[random.choice(min_frequency_indices)])
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
+            next_color = ColorType(SCOPE_COLORS[self.color_index])
+            self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+        else:
+            logging.error("No defined color picking for scheme '{}'".format(color_picking_scheme))
+            next_color = ColorType(SCOPE_COLORS[0])
+        return next_color
+
     # Check if the word exists, then remove it from the stack, otherwise add it
     def toggle_word(self, word):
         if self.has_word(word):
@@ -135,8 +154,8 @@ class WordHighlightCollection(object):
 
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
-        if word.color is UNSPECIFIED_COLOR or word.color is NEXT_COLOR:
-            word.set_color(self.get_next_color())
+        if word.color is UNSPECIFIED_COLOR:
+            word.set_color(self.get_next_word_color())
         self.words.append(word)
 
     def _remove_word(self, word):
@@ -259,7 +278,6 @@ def get_color_picking_scheme(name):
     assert isinstance(name, str)
     if name in color_schemes.keys():
         color_picking_scheme = color_schemes[name]
-        logging.debug("Chosen color picking scheme {}".format(color_picking_scheme))
     else:
         color_picking_scheme = get_color_picking_scheme("RANDOM")
         logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
@@ -274,7 +292,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         collection = restore_collection(view)
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
-        self.color_index = 0
 
     # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
     # re.compile(string, re.IGNORECASE)
@@ -284,26 +301,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         re_case_insensitive_language_files = re.compile(r'(i?)(VHDL)\.sublime-syntax')
         matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
         return matches_case_insensitive_language
-
-    @update_collection_wrapper
-    def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
-        import random
-        if color_picking_scheme is get_color_picking_scheme("RANDOM"):
-            next_color = ColorType(random.choice(SCOPE_COLORS))
-        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
-            min_ind = min((v,ind) for ind,v in enumerate(self.collection.color_frequencies()))[1]
-            next_color = ColorType(SCOPE_COLORS[min_ind])
-        elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
-            min_frequency = min((v,ind) for ind,v in enumerate(self.collection.color_frequencies()))[0]
-            min_frequency_indices = [ind for ind,f in enumerate(self.collection.color_frequencies()) if f == min_frequency]
-            next_color = ColorType(SCOPE_COLORS[random.choice(min_frequency_indices)])
-        elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
-            next_color = ColorType(SCOPE_COLORS[self.color_index])
-            self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
-        else:
-            logging.error("No defined color picking for scheme '{}'".format(color_picking_scheme))
-            next_color = ColorType(SCOPE_COLORS[0])
-        return next_color
 
     @update_collection_wrapper
     def run(self, edit):
@@ -325,9 +322,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False))
         # Get unique items
         text_selections = list(set(text_selections))
-        # Give each unique word a color
-        for w in text_selections:
-            w.color = self.get_next_word_color(color_picking_scheme)
 
         logging.debug("text_selections: " + str(text_selections))
 
