@@ -44,10 +44,7 @@ class ColorType(object):
 
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
 NEXT_COLOR        = ColorType("NEXT_COLOR")
-RANDOM_COLOR      = ColorType("RANDOM_COLOR")
-RANDOM_EVEN_COLOR = ColorType("RANDOM_EVEN_COLOR")
-CYCLIC_COLOR      = ColorType("CYCLIC_COLOR")
-CYCLIC_EVEN_COLOR = ColorType("CYCLIC_EVEN_COLOR")
+color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN"]}
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
@@ -258,6 +255,16 @@ def expand_to_word(view, point):
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(0, 0) # Empty region
 
+def get_color_picking_scheme(name):
+    assert isinstance(name, str)
+    if name in color_schemes.keys():
+        color_picking_scheme = color_schemes[name]
+        logging.debug("Chosen color picking scheme {}".format(color_picking_scheme))
+    else:
+        color_picking_scheme = get_color_picking_scheme("RANDOM")
+        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
+    return color_picking_scheme
+
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
     Highlights all instances of a specific word that is selected
@@ -278,36 +285,31 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
         return matches_case_insensitive_language
 
-    def get_next_word_color(self, color_picking_scheme=CYCLIC_COLOR):
+    @update_collection_wrapper
+    def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
         import random
-        if color_picking_scheme is RANDOM_COLOR:
+        if color_picking_scheme is get_color_picking_scheme("RANDOM"):
             next_color = ColorType(random.choice(SCOPE_COLORS))
-        elif color_picking_scheme is CYCLIC_EVEN_COLOR:
-            min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+            min_ind = min((v,ind) for ind,v in enumerate(self.collection.color_frequencies()))[1]
             next_color = ColorType(SCOPE_COLORS[min_ind])
-        elif color_picking_scheme is RANDOM_EVEN_COLOR:
-            min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
-            min_frequency_colors = [SCOPE_COLORS[ind] for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
+        elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
+            min_frequency = min((v,ind) for ind,v in enumerate(self.collection.color_frequencies()))[0]
+            min_frequency_colors = [SCOPE_COLORS[ind] for ind,f in enumerate(self.collection.color_frequencies()) if f == min_frequency]
             next_color = ColorType(random.choice(min_frequency_colors))
-        elif color_picking_scheme is CYCLIC_COLOR:
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
             next_color = ColorType(SCOPE_COLORS[self.color_index])
             self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
         else:
-            logging.error("Unknown color picking scheme {}".format(color_picking_scheme))
+            logging.error("No defined color picking for scheme '{}'".format(color_picking_scheme))
             next_color = ColorType(SCOPE_COLORS[0])
         return next_color
 
     @update_collection_wrapper
     def run(self, edit):
-        valid_color_schemes = ["CYCLIC_EVEN", "CYCLIC", "RANDOM", "RANDOM_EVEN"]
         settings = sublime.load_settings("word_highlighter.sublime-settings")
-        color_picking_scheme = settings.get("color_picking_scheme")
+        color_picking_scheme = get_color_picking_scheme(settings.get("color_picking_scheme"))
         logging.debug("Chosen color scheme: {}".format(color_picking_scheme))
-        if color_picking_scheme in valid_color_schemes:
-            color_picking_scheme = ColorType(color_picking_scheme)
-        else:
-            color_picking_scheme = RANDOM_COLOR
-            logging.error("Invalid next color scheme setting {}. Choose between {}".format(color_picking_scheme, valid_color_schemes))
         text_selections = []
         for s in self.view.sel():
             # Expand empty selections to words
