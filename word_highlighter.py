@@ -280,18 +280,21 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
 
     def get_next_word_color(self, color_picking_scheme=CYCLIC_COLOR):
         import random
-        if color_picking_scheme == RANDOM_COLOR:
+        if color_picking_scheme is RANDOM_COLOR:
             next_color = ColorType(random.choice(SCOPE_COLORS))
-        elif color_picking_scheme == CYCLIC_EVEN_COLOR:
+        elif color_picking_scheme is CYCLIC_EVEN_COLOR:
             min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
             next_color = ColorType(SCOPE_COLORS[min_ind])
-        elif color_picking_scheme == RANDOM_EVEN_COLOR:
+        elif color_picking_scheme is RANDOM_EVEN_COLOR:
             min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
             min_frequency_colors = [SCOPE_COLORS[ind] for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
             next_color = ColorType(random.choice(min_frequency_colors))
-        else: # color_picking_scheme == CYCLIC_COLOR:
+        elif color_picking_scheme is CYCLIC_COLOR:
             next_color = ColorType(SCOPE_COLORS[self.color_index])
             self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+        else:
+            logging.error("Unknown color picking scheme {}".format(color_picking_scheme))
+            next_color = ColorType(SCOPE_COLORS[0])
         return next_color
 
     @update_collection_wrapper
@@ -314,12 +317,15 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 txt = self.view.substr(r)
                 if txt != '':
                     logging.debug("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(WordHighlight(txt, color=self.get_next_word_color(), match_by_word=True))
+                    text_selections.append(WordHighlight(txt, match_by_word=True))
             # Keep non-empty selections as-is
             else:
-                text_selections.append(WordHighlight(self.view.substr(s), color=self.get_next_word_color(), match_by_word=False))
+                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False))
         # Get unique items
         text_selections = list(set(text_selections))
+        # Give each unique word a color
+        for w in text_selections:
+            w.color = self.get_next_word_color(next_color_scheme)
 
         logging.debug("text_selections: " + str(text_selections))
 
