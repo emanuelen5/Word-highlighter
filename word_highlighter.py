@@ -301,13 +301,13 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def run(self, edit):
         valid_color_schemes = ["CYCLIC_EVEN", "CYCLIC", "RANDOM", "RANDOM_EVEN"]
         settings = sublime.load_settings("word_highlighter.sublime-settings")
-        next_color_scheme = settings.get("next_color_scheme")
-        logging.debug("Chosen color scheme: {}".format(next_color_scheme))
-        if next_color_scheme in valid_color_schemes:
-            next_color_scheme = ColorType(next_color_scheme)
+        color_picking_scheme = settings.get("color_picking_scheme")
+        logging.debug("Chosen color scheme: {}".format(color_picking_scheme))
+        if color_picking_scheme in valid_color_schemes:
+            color_picking_scheme = ColorType(color_picking_scheme)
         else:
-            next_color_scheme = RANDOM_COLOR
-            logging.error("Invalid next color scheme setting {}. Choose between {}".format(next_color_scheme, valid_color_schemes))
+            color_picking_scheme = RANDOM_COLOR
+            logging.error("Invalid next color scheme setting {}. Choose between {}".format(color_picking_scheme, valid_color_schemes))
         text_selections = []
         for s in self.view.sel():
             # Expand empty selections to words
@@ -325,7 +325,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         text_selections = list(set(text_selections))
         # Give each unique word a color
         for w in text_selections:
-            w.color = self.get_next_word_color(next_color_scheme)
+            w.color = self.get_next_word_color(color_picking_scheme)
 
         logging.debug("text_selections: " + str(text_selections))
 
