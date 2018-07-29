@@ -2,5 +2,5 @@
 	// Time from modification until the highlighting is updated [seconds]
 	"debounce": 0.1,
     // {CYCLIC_EVEN, CYLIC, RANDOM_EVEN, RANDOM}
-    "next_word_color": "RANDOM_EVEN"
+    "color_picking_scheme": "CYCLIC_EVEN"
 }
