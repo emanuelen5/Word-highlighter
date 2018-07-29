@@ -45,14 +45,13 @@ class ColorType(object):
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
 NEXT_COLOR        = ColorType("NEXT_COLOR")
 RANDOM_COLOR      = ColorType("RANDOM_COLOR")
+RANDOM_EVEN_COLOR = ColorType("RANDOM_EVEN_COLOR")
+CYCLIC_COLOR      = ColorType("CYCLIC_COLOR")
+CYCLIC_EVEN_COLOR = ColorType("CYCLIC_EVEN_COLOR")
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
     def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
-        import random
-        if color is RANDOM_COLOR:
-            color = random.choice(SCOPE_COLORS)
-
         assert isinstance(word, str)
         if isinstance(color, str):
             color = ColorType(color)
@@ -136,10 +135,6 @@ class WordHighlightCollection(object):
         else:
             self._add_word(word)
         logging.debug("Used words: {}".format([str(w) for w in self.words]))
-
-    def get_next_color(self):
-        min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
-        return ColorType(SCOPE_COLORS[min_ind])
 
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
@@ -270,9 +265,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         collection = restore_collection(view)
-        self.settings = sublime.load_settings("word_highlighter.sublime-settings")
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
+        self.color_index = 0
 
     # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
     # re.compile(string, re.IGNORECASE)
@@ -283,12 +278,33 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
         return matches_case_insensitive_language
 
+    def get_next_word_color(self, color_picking_scheme=CYCLIC_COLOR):
+        import random
+        if color_picking_scheme == RANDOM_COLOR:
+            next_color = ColorType(random.choice(SCOPE_COLORS))
+        elif color_picking_scheme == CYCLIC_EVEN_COLOR:
+            min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
+            next_color = ColorType(SCOPE_COLORS[min_ind])
+        elif color_picking_scheme == RANDOM_EVEN_COLOR:
+            min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
+            min_frequency_colors = [SCOPE_COLORS[ind] for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
+            next_color = ColorType(random.choice(min_frequency_colors))
+        else: # color_picking_scheme == CYCLIC_COLOR:
+            next_color = ColorType(SCOPE_COLORS[self.color_index])
+            self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+        return next_color
+
     @update_collection_wrapper
     def run(self, edit):
-        if self.settings.get("next_word_color") == "CYCLIC_EVEN":
-            next_word_color = NEXT_COLOR
+        valid_color_schemes = ["CYCLIC_EVEN", "CYCLIC", "RANDOM", "RANDOM_EVEN"]
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        next_color_scheme = settings.get("next_color_scheme")
+        logging.debug("Chosen color scheme: {}".format(next_color_scheme))
+        if next_color_scheme in valid_color_schemes:
+            next_color_scheme = ColorType(next_color_scheme)
         else:
-            next_word_color = RANDOM_COLOR
+            next_color_scheme = RANDOM_COLOR
+            logging.error("Invalid next color scheme setting {}. Choose between {}".format(next_color_scheme, valid_color_schemes))
         text_selections = []
         for s in self.view.sel():
             # Expand empty selections to words
@@ -298,10 +314,10 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
                 txt = self.view.substr(r)
                 if txt != '':
                     logging.debug("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(WordHighlight(txt, color=next_word_color, match_by_word=True))
+                    text_selections.append(WordHighlight(txt, color=self.get_next_word_color(), match_by_word=True))
             # Keep non-empty selections as-is
             else:
-                text_selections.append(WordHighlight(self.view.substr(s), color=next_word_color, match_by_word=False))
+                text_selections.append(WordHighlight(self.view.substr(s), color=self.get_next_word_color(), match_by_word=False))
         # Get unique items
         text_selections = list(set(text_selections))
 
