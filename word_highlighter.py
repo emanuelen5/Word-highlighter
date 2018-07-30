@@ -127,6 +127,7 @@ class WordHighlightCollection(object):
 
     def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
         import random
+        assert isinstance(color_picking_scheme, ColorType)
         if color_picking_scheme is get_color_picking_scheme("RANDOM"):
             next_color = ColorType(random.choice(SCOPE_COLORS))
         elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
@@ -140,8 +141,9 @@ class WordHighlightCollection(object):
             next_color = ColorType(SCOPE_COLORS[self.color_index])
             self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
         else:
-            logging.error("No defined color picking for scheme '{}'".format(color_picking_scheme))
-            next_color = ColorType(SCOPE_COLORS[0])
+            error_msg = "No defined color picking for scheme '{}'".format(color_picking_scheme)
+            logging.error(error_msg)
+            raise AssertionError(error_msg)
         return next_color
 
     # Check if the word exists, then remove it from the stack, otherwise add it
