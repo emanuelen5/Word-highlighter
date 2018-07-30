@@ -54,6 +54,17 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
             expected_color = color_name
             self.assertEqual(expected_color, self.collection.get_next_word_color("CYCLIC").color_string, "Error for color {}".format(i))
 
+    def test_get_color_picking_schemes_invalid(self):
+        scheme_string = "Not a valid color picking scheme string"
+        scheme = word_highlighter.get_color_picking_scheme(scheme_string)
+        self.assertIsInstance(scheme, word_highlighter.ColorType)
+        self.assertNotIn(scheme_string, word_highlighter.color_schemes, "Does not already exist as a color picking scheme")
+        self.assertIn(scheme.color_string, word_highlighter.color_schemes, "Resolves to correct color picking scheme")
+
+    def test_get_color_picking_schemes(self):
+        for scheme_string in word_highlighter.color_schemes.keys():
+            self.assertIs(word_highlighter.color_schemes[scheme_string], word_highlighter.get_color_picking_scheme(scheme_string))
+
 class TestCollection(WordHighlighter_TestCase):
     def test_clear_words(self):
         word = word_highlighter.WordHighlight("asd", False)
