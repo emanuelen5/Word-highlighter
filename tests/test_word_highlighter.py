@@ -11,6 +11,7 @@ class SublimeText_TestCase(unittest.TestCase):
         self.view = self.window.new_file()
         self.view.set_scratch(True)
         self.error_list = []
+        self.maxDiff = None # Verbose printouts if error
 
     def tearDown(self):
         self.view.close()
