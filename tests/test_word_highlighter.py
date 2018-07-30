@@ -18,6 +18,11 @@ class SublimeText_TestCase(unittest.TestCase):
     def set_buffer(self, string):
         self.view.run_command("overwrite", {"characters": string})
 
+class WordHighlighter_TestCase(SublimeText_TestCase):
+    def setUp(self):
+        super(WordHighlighter_TestCase, self).setUp()
+        self.collection = word_highlighter.WordHighlightCollection(self.view)
+
 class TestHighlighting(SublimeText_TestCase):
     def check_character(self, c):
         self.set_buffer(c)
@@ -42,11 +47,7 @@ class TestHighlighting(SublimeText_TestCase):
                 self.error_list.append("'{}' - Error: '{}'".format(c,e))
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
 
-class TestColorPickingSchemes(SublimeText_TestCase):
-    def setUp(self):
-        super(TestColorPickingSchemes, self).setUp()
-        self.collection = word_highlighter.WordHighlightCollection(self.view)
-
+class TestColorPickingSchemes(WordHighlighter_TestCase):
     def test_cyclic(self):
         for i in range(100):
             color_name = word_highlighter.SCOPE_COLORS[i % len(word_highlighter.SCOPE_COLORS)]
