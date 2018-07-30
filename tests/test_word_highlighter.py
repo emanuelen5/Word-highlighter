@@ -40,8 +40,18 @@ class TestHighlighting(SublimeText_TestCase):
                 self.check_character(c)
             except AssertionError as e:
                 self.error_list.append("'{}' - Error: '{}'".format(c,e))
-        self.maxDiff = None
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
+
+class TestColorPickingSchemes(SublimeText_TestCase):
+    def setUp(self):
+        super(TestColorPickingSchemes, self).setUp()
+        self.collection = word_highlighter.WordHighlightCollection(self.view)
+
+    def test_cyclic(self):
+        for i in range(100):
+            color_name = word_highlighter.SCOPE_COLORS[i % len(word_highlighter.SCOPE_COLORS)]
+            expected_color = color_name
+            self.assertEqual(expected_color, self.collection.get_next_word_color("CYCLIC").color_string, "Error for color {}".format(i))
 
 ## For testing internal functions
 import sys
