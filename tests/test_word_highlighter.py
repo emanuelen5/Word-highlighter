@@ -54,6 +54,13 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
             expected_color = color_name
             self.assertEqual(expected_color, self.collection.get_next_word_color("CYCLIC").color_string, "Error for color {}".format(i))
 
+class TestCollection(WordHighlighter_TestCase):
+    def test_clear_words(self):
+        word = word_highlighter.WordHighlight("asd", False)
+        self.collection.toggle_word(word)
+        self.collection.clear()
+        self.assertEqual([], self.collection.words)
+
 ## For testing internal functions
 import sys
 version = sublime.version()
