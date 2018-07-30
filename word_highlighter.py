@@ -125,6 +125,9 @@ class WordHighlightCollection(object):
             freqs[i] = len([1 for w in self.words if (w.color == c)])
         return freqs
 
+    def next_color_index(self):
+        self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+
     def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
         import random
         assert isinstance(color_picking_scheme, ColorType)
@@ -136,17 +139,17 @@ class WordHighlightCollection(object):
         elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
             min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
             freqs = self.color_frequencies()
-            self.color_index += 1
             while freqs[self.color_index] != min_frequency:
-                self.color_index += 1
+                self.next_color_index()
             next_color = ColorType(SCOPE_COLORS[self.color_index])
+            self.next_color_index()
         elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
             min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
             min_frequency_indices = [ind for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
             next_color = ColorType(SCOPE_COLORS[random.choice(min_frequency_indices)])
         elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
             next_color = ColorType(SCOPE_COLORS[self.color_index])
-            self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+            self.next_color_index()
         else:
             error_msg = "No defined color picking for scheme '{}'".format(color_picking_scheme)
             logging.error(error_msg)

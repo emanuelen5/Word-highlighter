@@ -5,6 +5,9 @@ def region_to_list(region):
     assert isinstance(region, sublime.Region)
     return [region.begin(), region.end()]
 
+def get_scope_color(index):
+    return word_highlighter.SCOPE_COLORS[index % len(word_highlighter.SCOPE_COLORS)]
+
 class SublimeText_TestCase(unittest.TestCase):
     def setUp(self):
         self.window = sublime.active_window()
@@ -52,13 +55,23 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
     def test_cyclic(self):
         scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
         for i in range(100):
-            color_name = word_highlighter.SCOPE_COLORS[i % len(word_highlighter.SCOPE_COLORS)]
-            expected_color = color_name
             try:
-                self.assertEqual(expected_color, self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
+
+    def test_cyclic_even(self):
+        scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
+        for i in range(100):
+            try:
+                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+            except AssertionError as ae:
+                self.error_list.append(ae)
+        self.assertEqual([], self.error_list)
+
+    def test_cyclic_even_ordered(self):
+        self.fail()
 
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
