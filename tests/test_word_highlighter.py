@@ -50,10 +50,15 @@ class TestHighlighting(SublimeText_TestCase):
 
 class TestColorPickingSchemes(WordHighlighter_TestCase):
     def test_cyclic(self):
+        scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
         for i in range(100):
             color_name = word_highlighter.SCOPE_COLORS[i % len(word_highlighter.SCOPE_COLORS)]
             expected_color = color_name
-            self.assertEqual(expected_color, self.collection.get_next_word_color("CYCLIC").color_string, "Error for color {}".format(i))
+            try:
+                self.assertEqual(expected_color, self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+            except AssertionError as ae:
+                self.error_list.append(ae)
+        self.assertEqual([], self.error_list)
 
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
