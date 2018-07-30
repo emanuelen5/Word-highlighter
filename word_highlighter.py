@@ -43,7 +43,7 @@ class ColorType(object):
         return self.color_string
 
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
-color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN"]}
+color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN", "CYCLIC_EVEN_ORDERED"]}
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
@@ -130,9 +130,16 @@ class WordHighlightCollection(object):
         assert isinstance(color_picking_scheme, ColorType)
         if color_picking_scheme is get_color_picking_scheme("RANDOM"):
             next_color = ColorType(random.choice(SCOPE_COLORS))
-        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN_ORDERED"):
             min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
             next_color = ColorType(SCOPE_COLORS[min_ind])
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+            min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
+            freqs = self.color_frequencies()
+            self.color_index += 1
+            while freqs[self.color_index] != min_frequency:
+                self.color_index += 1
+            next_color = ColorType(SCOPE_COLORS[self.color_index])
         elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
             min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
             min_frequency_indices = [ind for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]

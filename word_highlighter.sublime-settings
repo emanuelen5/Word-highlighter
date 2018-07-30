@@ -1,6 +1,7 @@
 {
 	// Time from modification until the highlighting is updated [seconds]
 	"debounce": 0.1,
-    // {CYCLIC_EVEN, CYLIC, RANDOM_EVEN, RANDOM}
+    // The way to choose the next color.
+    // Choose among: [CYCLIC, CYCLIC_EVEN, CYCLIC_EVEN_ORDERED, RANDOM, RANDOM_EVEN]
     "color_picking_scheme": "CYCLIC_EVEN"
 }
