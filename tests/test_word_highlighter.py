@@ -5,7 +5,7 @@ def region_to_list(region):
     assert isinstance(region, sublime.Region)
     return [region.begin(), region.end()]
 
-class TestHighlighting(unittest.TestCase):
+class SublimeText_TestCase(unittest.TestCase):
     def setUp(self):
         self.window = sublime.active_window()
         self.view = self.window.new_file()
@@ -15,8 +15,12 @@ class TestHighlighting(unittest.TestCase):
     def tearDown(self):
         self.view.close()
 
+    def set_buffer(self, string):
+        self.view.run_command("overwrite", {"characters": string})
+
+class TestHighlighting(SublimeText_TestCase):
     def check_character(self, c):
-        self.view.run_command("overwrite", {"characters": c})
+        self.set_buffer(c)
         # Select the only character in the buffer
         s = self.view.sel()
         s.clear()
