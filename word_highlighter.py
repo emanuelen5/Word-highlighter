@@ -282,7 +282,7 @@ def get_color_picking_scheme(name):
     if name in color_schemes.keys():
         color_picking_scheme = color_schemes[name]
     else:
-        color_picking_scheme = get_color_picking_scheme("RANDOM")
+        color_picking_scheme = color_schemes["RANDOM"]
         logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
     return color_picking_scheme
 
