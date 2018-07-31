@@ -45,6 +45,15 @@ class ColorType(object):
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
 color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN", "CYCLIC_EVEN_ORDERED"]}
 
+def get_color_picking_scheme(name):
+    assert isinstance(name, str)
+    if name in color_schemes.keys():
+        color_picking_scheme = color_schemes[name]
+    else:
+        color_picking_scheme = color_schemes["RANDOM"]
+        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
+    return color_picking_scheme
+
 # Instances that combine a word with a color scope
 class WordHighlight(object):
     def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
@@ -288,15 +297,6 @@ def expand_to_word(view, point):
         else:
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(0, 0) # Empty region
-
-def get_color_picking_scheme(name):
-    assert isinstance(name, str)
-    if name in color_schemes.keys():
-        color_picking_scheme = color_schemes[name]
-    else:
-        color_picking_scheme = color_schemes["RANDOM"]
-        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
-    return color_picking_scheme
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """
