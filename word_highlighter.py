@@ -43,7 +43,16 @@ class ColorType(object):
         return self.color_string
 
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
-color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN"]}
+color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN", "CYCLIC_EVEN_ORDERED"]}
+
+def get_color_picking_scheme(name):
+    assert isinstance(name, str)
+    if name in color_schemes.keys():
+        color_picking_scheme = color_schemes[name]
+    else:
+        color_picking_scheme = color_schemes["RANDOM"]
+        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
+    return color_picking_scheme
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
@@ -125,23 +134,35 @@ class WordHighlightCollection(object):
             freqs[i] = len([1 for w in self.words if (w.color == c)])
         return freqs
 
+    def next_color_index(self):
+        self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+
     def get_next_word_color(self, color_picking_scheme=get_color_picking_scheme("CYCLIC")):
         import random
+        assert isinstance(color_picking_scheme, ColorType)
         if color_picking_scheme is get_color_picking_scheme("RANDOM"):
             next_color = ColorType(random.choice(SCOPE_COLORS))
-        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN_ORDERED"):
             min_ind = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[1]
             next_color = ColorType(SCOPE_COLORS[min_ind])
+        elif color_picking_scheme is get_color_picking_scheme("CYCLIC_EVEN"):
+            min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
+            freqs = self.color_frequencies()
+            while freqs[self.color_index] != min_frequency:
+                self.next_color_index()
+            next_color = ColorType(SCOPE_COLORS[self.color_index])
+            self.next_color_index()
         elif color_picking_scheme is get_color_picking_scheme("RANDOM_EVEN"):
             min_frequency = min((v,ind) for ind,v in enumerate(self.color_frequencies()))[0]
             min_frequency_indices = [ind for ind,f in enumerate(self.color_frequencies()) if f == min_frequency]
             next_color = ColorType(SCOPE_COLORS[random.choice(min_frequency_indices)])
         elif color_picking_scheme is get_color_picking_scheme("CYCLIC"):
             next_color = ColorType(SCOPE_COLORS[self.color_index])
-            self.color_index = (self.color_index + 1) % len(SCOPE_COLORS)
+            self.next_color_index()
         else:
-            logging.error("No defined color picking for scheme '{}'".format(color_picking_scheme))
-            next_color = ColorType(SCOPE_COLORS[0])
+            error_msg = "No defined color picking for scheme '{}'".format(color_picking_scheme)
+            logging.error(error_msg)
+            raise AssertionError(error_msg)
         return next_color
 
     # Check if the word exists, then remove it from the stack, otherwise add it
@@ -276,15 +297,6 @@ def expand_to_word(view, point):
         else:
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(0, 0) # Empty region
-
-def get_color_picking_scheme(name):
-    assert isinstance(name, str)
-    if name in color_schemes.keys():
-        color_picking_scheme = color_schemes[name]
-    else:
-        color_picking_scheme = get_color_picking_scheme("RANDOM")
-        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
-    return color_picking_scheme
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """

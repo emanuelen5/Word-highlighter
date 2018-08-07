@@ -5,18 +5,31 @@ def region_to_list(region):
     assert isinstance(region, sublime.Region)
     return [region.begin(), region.end()]
 
-class TestHighlighting(unittest.TestCase):
+def get_scope_color(index):
+    return word_highlighter.SCOPE_COLORS[index % len(word_highlighter.SCOPE_COLORS)]
+
+class SublimeText_TestCase(unittest.TestCase):
     def setUp(self):
         self.window = sublime.active_window()
         self.view = self.window.new_file()
         self.view.set_scratch(True)
         self.error_list = []
+        self.maxDiff = None # Verbose printouts if error
 
     def tearDown(self):
         self.view.close()
 
+    def set_buffer(self, string):
+        self.view.run_command("overwrite", {"characters": string})
+
+class WordHighlighter_TestCase(SublimeText_TestCase):
+    def setUp(self):
+        super(WordHighlighter_TestCase, self).setUp()
+        self.collection = word_highlighter.WordHighlightCollection(self.view)
+
+class TestHighlighting(SublimeText_TestCase):
     def check_character(self, c):
-        self.view.run_command("overwrite", {"characters": c})
+        self.set_buffer(c)
         # Select the only character in the buffer
         s = self.view.sel()
         s.clear()
@@ -36,8 +49,44 @@ class TestHighlighting(unittest.TestCase):
                 self.check_character(c)
             except AssertionError as e:
                 self.error_list.append("'{}' - Error: '{}'".format(c,e))
-        self.maxDiff = None
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
+
+class TestColorPickingSchemes(WordHighlighter_TestCase):
+    def test_cyclic(self):
+        scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
+        for i in range(100):
+            try:
+                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+            except AssertionError as ae:
+                self.error_list.append(ae)
+        self.assertEqual([], self.error_list)
+
+    def test_cyclic_even_ordered(self):
+        scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
+        for i in range(100):
+            try:
+                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+            except AssertionError as ae:
+                self.error_list.append(ae)
+        self.assertEqual([], self.error_list)
+
+    def test_get_color_picking_schemes_invalid(self):
+        scheme_string = "Not a valid color picking scheme string"
+        scheme = word_highlighter.get_color_picking_scheme(scheme_string)
+        self.assertIsInstance(scheme, word_highlighter.ColorType)
+        self.assertNotIn(scheme_string, word_highlighter.color_schemes, "Does not already exist as a color picking scheme")
+        self.assertIn(scheme.color_string, word_highlighter.color_schemes, "Resolves to correct color picking scheme")
+
+    def test_get_color_picking_schemes(self):
+        for scheme_string in word_highlighter.color_schemes.keys():
+            self.assertIs(word_highlighter.color_schemes[scheme_string], word_highlighter.get_color_picking_scheme(scheme_string))
+
+class TestCollection(WordHighlighter_TestCase):
+    def test_clear_words(self):
+        word = word_highlighter.WordHighlight("asd", False)
+        self.collection.toggle_word(word)
+        self.collection.clear()
+        self.assertEqual([], self.collection.words)
 
 ## For testing internal functions
 import sys
