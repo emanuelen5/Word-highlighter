@@ -61,7 +61,7 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
-    def test_cyclic_even(self):
+    def test_cyclic_even_ordered(self):
         scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
         for i in range(100):
             try:
@@ -69,9 +69,6 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
-
-    def test_cyclic_even_ordered(self):
-        self.fail()
 
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"

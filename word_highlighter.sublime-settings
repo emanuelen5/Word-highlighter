@@ -3,5 +3,5 @@
 	"debounce": 0.1,
     // The way to choose the next color.
     // Choose among: [CYCLIC, CYCLIC_EVEN, CYCLIC_EVEN_ORDERED, RANDOM, RANDOM_EVEN]
-    "color_picking_scheme": "CYCLIC_EVEN"
+    "color_picking_scheme": "CYCLIC_EVEN_ORDERED"
 }
