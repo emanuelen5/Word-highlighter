@@ -1,4 +1,5 @@
 [
 	{"keys": ["alt+k", "h", "w"], "command": "word_highlighter_highlight_instances_of_selection"},
-	{"keys": ["alt+k", "h", "c"], "command": "word_highlighter_clear_instances"},
+    {"keys": ["alt+k", "h", "c"], "command": "word_highlighter_clear_instances"},
+	{"keys": ["alt+k", "h", "m"], "command": "word_highlighter_show_menu"},
 ]

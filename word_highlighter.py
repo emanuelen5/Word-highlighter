@@ -249,6 +249,18 @@ class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def run(self, edit):
         self.collection.clear()
 
+sublime.POPUP_LOCATION_AT_CURSOR = -1
+
+def navigate(link_string):
+    print("Link string: {}".format(link_string))
+    view.hide_popup()
+
+class wordHighlighterShowMenu(sublime_plugin.TextCommand):
+    @update_collection_wrapper
+    def run(self, edit):
+        content = "<h3>Word highlighter menu</h3><a href=\"link_name\">Link text</a>"
+        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=navigate)
+
 def restore_collection(view):
     collection = WordHighlightCollection(view)
     for s in SCOPE_COLORS:
