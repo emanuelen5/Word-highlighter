@@ -261,6 +261,24 @@ class wordHighlighterShowMenu(sublime_plugin.TextCommand):
         content = "<h3>Word highlighter menu</h3><a href=\"link_name\">Link text</a>"
         self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=navigate)
 
+# Menu for clearing highlighted words
+class wordHighlighterClearMenu(sublime_plugin.TextCommand):
+    @update_collection_wrapper
+    def run(self, edit):
+        words = [w for w in self.collection.words]
+        word_strings = [w.word for w in words]
+
+        INDEX_NONE_CHOSEN = -1
+        def clear_word(chosen_index):
+            s = self.view.settings()
+            self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
+            if chosen_index == INDEX_NONE_CHOSEN:
+                return
+            self.collection._remove_word(words[chosen_index])
+            s.set("wordhighlighter_collection", self.collection.dumps())
+
+        self.view.window().show_quick_panel(word_strings, clear_word, sublime.MONOSPACE_FONT)
+
 def restore_collection(view):
     collection = WordHighlightCollection(view)
     for s in SCOPE_COLORS:
