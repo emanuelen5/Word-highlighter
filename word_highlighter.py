@@ -269,15 +269,14 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand):
         word_strings = [w.word for w in words]
 
         INDEX_NONE_CHOSEN = -1
-        def clear_word(chosen_index):
-            s = self.view.settings()
-            self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
+        @update_collection_wrapper
+        def clear_word(self, chosen_index):
             if chosen_index == INDEX_NONE_CHOSEN:
                 return
             self.collection._remove_word(words[chosen_index])
-            s.set("wordhighlighter_collection", self.collection.dumps())
+        clear_word_constant_self = lambda chosen_index: clear_word(self, chosen_index)
 
-        self.view.window().show_quick_panel(word_strings, clear_word, sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(word_strings, clear_word_constant_self, sublime.MONOSPACE_FONT)
 
 def restore_collection(view):
     collection = WordHighlightCollection(view)
