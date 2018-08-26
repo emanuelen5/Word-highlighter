@@ -249,34 +249,47 @@ class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def run(self, edit):
         self.collection.clear()
 
+# Monkey-patching some good-to-have constants
 sublime.POPUP_LOCATION_AT_CURSOR = -1
+sublime.INDEX_NONE_CHOSEN = -1
 
+# Menu for showing highlighted words and their coloring
 class wordHighlighterShowMenu(sublime_plugin.TextCommand):
+    # Inner function that can access attributes
+    @update_collection_wrapper
+    def navigate(self, clicked_link_string):
+        print("Link string: {}".format(clicked_link_string))
+        self.view.hide_popup()
+
+    def create_navigate_callback(self):
+        def navigate_wrapper(clicked_link_string):
+            return self.navigate(clicked_link_string)
+        return navigate_wrapper
+
     @update_collection_wrapper
     def run(self, edit):
-        # Inner function that can access attributes
-        def navigate(link_string):
-            print("Link string: {}".format(link_string))
-            self.view.hide_popup()
         content = "<h3>Word highlighter menu</h3><a href=\"link_name\">Link text</a>"
-        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=navigate)
+        navigate_no_self = lambda clicked_link_string: self.navigate(clicked_link_string)
+        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=self.create_navigate_callback())
 
 # Menu for clearing highlighted words
 class wordHighlighterClearMenu(sublime_plugin.TextCommand):
     @update_collection_wrapper
+    def clear_word(self, original_words, chosen_index):
+        if chosen_index == sublime.INDEX_NONE_CHOSEN:
+            return
+        self.collection._remove_word(original_words[chosen_index])
+
+    def create_clear_word_callback(self, original_words):
+        def clear_word_wrapper(chosen_index):
+            return self.clear_word(original_words, chosen_index)
+        return clear_word_wrapper
+
+    @update_collection_wrapper
     def run(self, edit):
         words = [w for w in self.collection.words]
         word_strings = [w.word for w in words]
-
-        INDEX_NONE_CHOSEN = -1
-        @update_collection_wrapper
-        def clear_word(self, chosen_index):
-            if chosen_index == INDEX_NONE_CHOSEN:
-                return
-            self.collection._remove_word(words[chosen_index])
-        clear_word_constant_self = lambda chosen_index: clear_word(self, chosen_index)
-
-        self.view.window().show_quick_panel(word_strings, clear_word_constant_self, sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(word_strings, self.create_clear_word_callback(words), sublime.MONOSPACE_FONT)
 
 def restore_collection(view):
     collection = WordHighlightCollection(view)
