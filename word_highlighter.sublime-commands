@@ -1,10 +1,14 @@
 [
 	{
-		"caption": "Test Word Highlighter",
-		"command": "test_word_highlighter"
-	},
-	{
-		"caption": "Highlight instances of selection",
+		"caption": "Word Highlighter: Highlight instances of selection",
 		"command": "word_highlighter_highlight_instances_of_selection"
 	},
+    {
+        "caption": "Word Highlighter: Clear highlighting",
+        "command": "word_highlighter_clear_instances"
+    },
+    {
+        "caption": "Word Highlighter: Open clear list",
+        "command": "word_highlighter_clear_menu"
+    },
 ]
