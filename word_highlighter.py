@@ -206,7 +206,7 @@ class WordHighlightCollection(object):
         assert isinstance(instance, cls)
         return instance
 
-# Updates the collection for the object
+# Updates the collection for the object (makes the function not re-entrant!)
 def update_collection_wrapper(function):
     def wrap(self, *args, **kwargs):
         s = self.view.settings()
@@ -277,16 +277,21 @@ class wordHighlighterShowMenu(sublime_plugin.TextCommand):
 # Menu for clearing highlighted words
 class wordHighlighterClearMenu(sublime_plugin.TextCommand):
     @update_collection_wrapper
+    def _clear_word(self, original_words, chosen_index):
+        self.collection._remove_word(original_words[chosen_index])
+
     def clear_word(self, original_words, chosen_index):
         if chosen_index == sublime.INDEX_NONE_CHOSEN:
             return
-        self.collection._remove_word(original_words[chosen_index])
+        self._clear_word(original_words, chosen_index)
+        new_index = min(chosen_index, len(original_words)-2)
+        self.view.run_command("word_highlighter_clear_menu", args={"index": new_index})
 
     @update_collection_wrapper
-    def run(self, edit):
+    def run(self, edit, index=0):
         words = [w for w in self.collection.words]
         word_strings = [w.word for w in words]
-        self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
 
 def restore_collection(view):
     collection = WordHighlightCollection(view)
