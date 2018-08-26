@@ -249,6 +249,13 @@ class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def run(self, edit):
         self.collection.clear()
 
+def save_argument_wrapper(callback, *const_args, **const_kwargs):
+    def saved_argument_callback(*args, **kwargs):
+        args = const_args + args
+        kwargs = dict(const_kwargs, **kwargs)
+        return callback(*args, **kwargs)
+    return saved_argument_callback
+
 # Monkey-patching some good-to-have constants
 sublime.POPUP_LOCATION_AT_CURSOR = -1
 sublime.INDEX_NONE_CHOSEN = -1
@@ -261,16 +268,11 @@ class wordHighlighterShowMenu(sublime_plugin.TextCommand):
         print("Link string: {}".format(clicked_link_string))
         self.view.hide_popup()
 
-    def create_navigate_callback(self):
-        def navigate_wrapper(clicked_link_string):
-            return self.navigate(clicked_link_string)
-        return navigate_wrapper
-
     @update_collection_wrapper
     def run(self, edit):
         content = "<h3>Word highlighter menu</h3><a href=\"link_name\">Link text</a>"
         navigate_no_self = lambda clicked_link_string: self.navigate(clicked_link_string)
-        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=self.create_navigate_callback())
+        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=save_argument_wrapper(self.navigate))
 
 # Menu for clearing highlighted words
 class wordHighlighterClearMenu(sublime_plugin.TextCommand):
@@ -280,16 +282,11 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand):
             return
         self.collection._remove_word(original_words[chosen_index])
 
-    def create_clear_word_callback(self, original_words):
-        def clear_word_wrapper(chosen_index):
-            return self.clear_word(original_words, chosen_index)
-        return clear_word_wrapper
-
     @update_collection_wrapper
     def run(self, edit):
         words = [w for w in self.collection.words]
         word_strings = [w.word for w in words]
-        self.view.window().show_quick_panel(word_strings, self.create_clear_word_callback(words), sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT)
 
 def restore_collection(view):
     collection = WordHighlightCollection(view)
