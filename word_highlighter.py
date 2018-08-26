@@ -325,7 +325,7 @@ def expand_to_word(view, point):
             return r
         else:
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
-            return sublime.Region(0, 0) # Empty region
+            return sublime.Region(point, point) # Empty region
 
 class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     """

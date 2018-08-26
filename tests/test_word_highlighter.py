@@ -109,6 +109,11 @@ class TestExpandToWordSimple(SublimeText_TestCase):
         self.region = word_highlighter.expand_to_word(self.view, 1)
         self.assertEqual(sublime.Region(0, 4), self.region)
 
+    def test_no_word(self):
+        self.set_buffer(" ")
+        self.region = word_highlighter.expand_to_word(self.view, 1)
+        self.assertEqual(sublime.Region(1, 1), self.region)
+
 ## For testing internal functions
 import sys
 version = sublime.version()
