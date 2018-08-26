@@ -93,6 +93,22 @@ class TestCollection(WordHighlighter_TestCase):
         self.collection.clear()
         self.assertEqual([], self.collection.words)
 
+class TestExpandToWordSimple(SublimeText_TestCase):
+    def test_start_of_word(self):
+        self.set_buffer("word")
+        self.region = word_highlighter.expand_to_word(self.view, 0)
+        self.assertEqual(sublime.Region(0, 4), self.region)
+
+    def test_end_of_word(self):
+        self.set_buffer("word")
+        self.region = word_highlighter.expand_to_word(self.view, 4)
+        self.assertEqual(sublime.Region(0, 4), self.region)
+
+    def test_middle_of_word(self):
+        self.set_buffer("word")
+        self.region = word_highlighter.expand_to_word(self.view, 1)
+        self.assertEqual(sublime.Region(0, 4), self.region)
+
 ## For testing internal functions
 import sys
 version = sublime.version()
