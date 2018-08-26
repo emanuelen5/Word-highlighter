@@ -1,5 +1,6 @@
 # Word highlighter for Sublime Text
 [![Build Status](https://travis-ci.org/emanuelen5/Word-highlighter.svg?branch=master)](https://travis-ci.org/emanuelen5/Word-highlighter)
+[![codecov](https://codecov.io/gh/emanuelen5/Word-highlighter/branch/master/graph/badge.svg)](https://codecov.io/gh/emanuelen5/Word-highlighter)
 
 The plugin is meant as a replacement for the Emacs plugin [highlight-symbol](http://nschum.de/src/emacs/highlight-symbol/). I will add some examples to show how it works when I get the time.
 
