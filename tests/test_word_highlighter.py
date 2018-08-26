@@ -41,6 +41,8 @@ class TestHighlighting(SublimeText_TestCase):
         self.assertEqual(region_to_list(sublime.Region(0,1)), region_to_list(regions[0]), "The first word should be highlighted")
 
     def test_highlight_characters(self):
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
         chars = [chr(i) for i in range(0x20, 0x7f)]
         chars += ['\r', '\n']
         for i, c in enumerate(chars):
