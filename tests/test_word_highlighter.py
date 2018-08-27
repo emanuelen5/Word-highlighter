@@ -26,6 +26,9 @@ class WordHighlighter_TestCase(SublimeText_TestCase):
     def setUp(self):
         super(WordHighlighter_TestCase, self).setUp()
         self.collection = word_highlighter.WordHighlightCollection(self.view)
+        # Need to set up a saved serialized wordhighlighter_collection to make it in the same state as main script
+        s = self.view.settings()
+        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
 
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
