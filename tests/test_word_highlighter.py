@@ -117,7 +117,7 @@ class TestExpandToWordSimple(SublimeText_TestCase):
 class TestRestoreCollection(SublimeText_TestCase):
     def setUp(self):
         super(TestRestoreCollection, self).setUp()
-        self.scope_name = self.key_name = "word_highlighter.color0"
+        self.scope_name = self.key_name = word_highlighter.SCOPE_COLORS[0]
 
     def tearDown(self):
         super(TestRestoreCollection, self).tearDown()
