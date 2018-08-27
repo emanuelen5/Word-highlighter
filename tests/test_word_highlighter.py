@@ -1,5 +1,6 @@
 import unittest
 import sublime
+from unittest.mock import MagicMock, patch
 
 def region_to_list(region):
     assert isinstance(region, sublime.Region)
@@ -147,6 +148,22 @@ class TestRestoreCollection(SublimeText_TestCase):
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
         self.assertEqual(False, word.matches_by_word())
+
+def clip(min_val, val, max_val):
+    return min(max(min_val, val), max_val)
+
+class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
+    def setUp(self):
+        super(TestWordHighlighterClearMenu, self).setUp()
+        self.wordHighlighterClearMenu = word_highlighter.wordHighlighterClearMenu(self.view)
+
+    def test_quick_panel_is_called(self):
+        self.set_buffer("")
+        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
+            show_quick_panel_mock = MagicMock(side_effect=(None))
+            mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
+            self.wordHighlighterClearMenu._run()
+        self.assertEqual(1, len(show_quick_panel_mock.mock_calls))
 
 ## For testing internal functions
 import sys
