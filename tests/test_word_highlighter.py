@@ -114,6 +114,37 @@ class TestExpandToWordSimple(SublimeText_TestCase):
         self.region = word_highlighter.expand_to_word(self.view, 1)
         self.assertEqual(sublime.Region(1, 1), self.region)
 
+class TestRestoreCollection(SublimeText_TestCase):
+    def setUp(self):
+        super(TestRestoreCollection, self).setUp()
+        self.scope_name = self.key_name = "word_highlighter.color0"
+
+    def tearDown(self):
+        super(TestRestoreCollection, self).tearDown()
+        self.view.erase_regions(self.scope_name)
+
+    def test_whole_word(self):
+        self.set_buffer("word")
+        self.view.add_regions(self.key_name, [sublime.Region(0,4)], self.scope_name)
+        collection = word_highlighter.restore_collection(self.view)
+        self.assertEqual(1, len(collection.words))
+        word = collection.words[0]
+        self.assertIsInstance(word, word_highlighter.WordHighlight)
+        self.assertEqual(self.scope_name, word.get_scope())
+        self.assertEqual(self.key_name, word.get_key())
+        self.assertEqual(True, word.matches_by_word())
+
+    def test_partial_word(self):
+        self.set_buffer("word")
+        self.view.add_regions(self.key_name, [sublime.Region(0,3)], self.scope_name)
+        collection = word_highlighter.restore_collection(self.view)
+        self.assertEqual(1, len(collection.words))
+        word = collection.words[0]
+        self.assertIsInstance(word, word_highlighter.WordHighlight)
+        self.assertEqual(self.scope_name, word.get_scope())
+        self.assertEqual(self.key_name, word.get_key())
+        self.assertEqual(False, word.matches_by_word())
+
 ## For testing internal functions
 import sys
 version = sublime.version()

@@ -78,6 +78,9 @@ class WordHighlight(object):
             regex = '\\b' + regex + '\\b'
         return regex
 
+    def matches_by_word(self):
+        return self.match_by_word
+
     def get_key(self):
         return self.color.color_string
 
@@ -292,7 +295,6 @@ def restore_collection(view):
         for w in unique_words:
             logging.info("Restoring word: '{}'".format(w[0]))
             collection._add_word(WordHighlight(*w, color=s))
-    collection.update()
     return collection
 
 # Expand the point to a region that contains a word, or an empty Region if
@@ -334,6 +336,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
         collection = restore_collection(view)
+        collection.update()
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
 
