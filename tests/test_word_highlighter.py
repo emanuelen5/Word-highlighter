@@ -34,7 +34,7 @@ class WordHighlighter_TestCase(SublimeText_TestCase):
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
         super(TestHighlighting, self).setUp()
-        settings = sublime.load_settings("Preferences.sublime-settings")
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
         settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
 
     def check_character(self, c):
@@ -51,7 +51,7 @@ class TestHighlighting(SublimeText_TestCase):
 
     def test_highlight_characters(self):
         chars = [chr(i) for i in range(0x20, 0x7f)]
-        chars += ['\r', '\n', '\t']
+        chars += ['\r', '\n']
         for i, c in enumerate(chars):
             try:
                 self.view.run_command("word_highlighter_clear_instances")
@@ -164,6 +164,25 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
             mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
             self.wordHighlighterClearMenu._run()
         self.assertEqual(1, len(show_quick_panel_mock.mock_calls))
+
+    def test_clearing_all_words(self):
+        # Add some words and highlight them
+        self.set_buffer("word1 word2 word3")
+        self.collection._add_word(word_highlighter.WordHighlight("word1", match_by_word=True))
+        self.collection._add_word(word_highlighter.WordHighlight("word2", match_by_word=True))
+        self.collection._add_word(word_highlighter.WordHighlight("word3", match_by_word=True))
+        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
+
+        # Mocks the quick panel call and returns index of last item
+        def show_quick_panel_mock_call__select_last_item(items, callback, *args, selected_index=0, **kwargs):
+            return callback(clip(-1, selected_index, len(items)-1))
+
+        # Do the actual testing
+        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
+            show_quick_panel_mock = MagicMock(side_effect=show_quick_panel_mock_call__select_last_item)
+            mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
+            self.wordHighlighterClearMenu._run()
+        self.assertEqual(4, len(show_quick_panel_mock.mock_calls))
 
 ## For testing internal functions
 import sys
