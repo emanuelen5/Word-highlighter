@@ -34,7 +34,7 @@ class WordHighlighter_TestCase(SublimeText_TestCase):
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
         super(TestHighlighting, self).setUp()
-        settings = sublime.load_settings("Preferences.sublime-settings")
+        settings = sublime.load_settings("word_highlighter.sublime-settings")
         settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
 
     def check_character(self, c):
@@ -51,7 +51,7 @@ class TestHighlighting(SublimeText_TestCase):
 
     def test_highlight_characters(self):
         chars = [chr(i) for i in range(0x20, 0x7f)]
-        chars += ['\r', '\n', '\t']
+        chars += ['\r', '\n']
         for i, c in enumerate(chars):
             try:
                 self.view.run_command("word_highlighter_clear_instances")
