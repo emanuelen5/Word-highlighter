@@ -209,6 +209,15 @@ class WordHighlightCollection(object):
         assert isinstance(instance, cls)
         return instance
 
+class CollectionableMixin(object):
+    def load_collection(self):
+        s = self.view.settings()
+        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
+
+    def save_collection(self):
+        s = self.view.settings()
+        s.set("wordhighlighter_collection", self.collection.dumps())
+
 # Updates the collection for the object (makes the function not re-entrant!)
 def update_collection_wrapper(function):
     def wrap(self, *args, **kwargs):
@@ -219,7 +228,7 @@ def update_collection_wrapper(function):
         return ret_value
     return wrap
 
-class update_words_event(sublime_plugin.ViewEventListener):
+class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
     Runs an update of the highlights
     '''
@@ -263,7 +272,7 @@ def save_argument_wrapper(callback, *const_args, **const_kwargs):
 sublime.INDEX_NONE_CHOSEN = -1
 
 # Menu for clearing highlighted words
-class wordHighlighterClearMenu(sublime_plugin.TextCommand):
+class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
     @update_collection_wrapper
     def _clear_word(self, original_words, chosen_index):
         self.collection._remove_word(original_words[chosen_index])
@@ -275,8 +284,8 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand):
         new_index = min(chosen_index, len(original_words)-2)
         self._run(new_index)
 
-    @update_collection_wrapper
     def _run(self, index=0):
+        self.load_collection()
         words = [w for w in self.collection.words]
         word_strings = [w.word for w in words]
         self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
@@ -332,7 +341,7 @@ def expand_to_word(view, point):
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(point, point) # Empty region
 
-class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
+class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, CollectionableMixin):
     """
     Highlights all instances of a specific word that is selected
     """
@@ -352,7 +361,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
         return matches_case_insensitive_language
 
-    @update_collection_wrapper
     def run(self, edit):
         text_selections = []
         for s in self.view.sel():
@@ -373,6 +381,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand):
         logging.debug("text_selections: " + str(text_selections))
 
         # Find all instances of each selection
+        self.load_collection()
         for w in text_selections:
             self.collection.toggle_word(w)
         self.collection.update()
