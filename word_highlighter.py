@@ -385,3 +385,4 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
         for w in text_selections:
             self.collection.toggle_word(w)
         self.collection.update()
+        self.save_collection()
