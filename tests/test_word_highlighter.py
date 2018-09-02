@@ -30,6 +30,7 @@ class WordHighlighter_TestCase(SublimeText_TestCase):
         # Need to set up a saved serialized wordhighlighter_collection to make it in the same state as main script
         s = self.view.settings()
         self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
+        self.color_count = len(word_highlighter.SCOPE_COLORS)
 
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
@@ -61,34 +62,37 @@ class TestHighlighting(SublimeText_TestCase):
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
 
 class TestColorPickingSchemes(WordHighlighter_TestCase):
+    def get_color_index(self, word):
+        assert isinstance(word, word_highlighter.ColorType), "get_color_index: word is not a ColorType"
+        return word_highlighter.SCOPE_COLORS.index(word.color_string)
+
     def test_cyclic(self):
         scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
-        for i in range(100):
+        for i in range(self.color_count):
             try:
-                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(scheme)), "Error for color {}".format(i))
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
-    def test_cyclic_even_ordered(self):
+    def test_cyclic_even(self):
         scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
-        for i in range(100):
+        for i in range(self.color_count):
             try:
-                self.assertEqual(get_scope_color(i), self.collection.get_next_word_color(scheme).color_string, "Error for color {}".format(i))
+                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(scheme)), "Error for color {}".format(i))
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
     def test_random(self):
-        scheme = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
-        color_count = len(word_highlighter.SCOPE_COLORS)
-        bins = [0] * color_count
+        scheme = word_highlighter.get_color_picking_scheme("RANDOM")
+        bins = [0] * self.color_count
         iterations_per_color = 1000
-        iterations = iterations_per_color * color_count
+        iterations = iterations_per_color * self.color_count
         for i in range(iterations):
-            index = word_highlighter.SCOPE_COLORS.index(self.collection.get_next_word_color(scheme).color_string)
+            index = self.get_color_index(self.collection.get_next_word_color(scheme))
             bins[index] += 1
-        for i in range(color_count):
+        for i in range(self.color_count):
             try:
                 self.assertLess(iterations_per_color*0.9, bins[i], "Error for color {}".format(i))
             except AssertionError as ae:
