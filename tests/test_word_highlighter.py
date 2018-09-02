@@ -79,6 +79,22 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
+    def test_random(self):
+        scheme = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
+        color_count = len(word_highlighter.SCOPE_COLORS)
+        bins = [0] * color_count
+        iterations_per_color = 1000
+        iterations = iterations_per_color * color_count
+        for i in range(iterations):
+            index = word_highlighter.SCOPE_COLORS.index(self.collection.get_next_word_color(scheme).color_string)
+            bins[index] += 1
+        for i in range(color_count):
+            try:
+                self.assertLess(iterations_per_color*0.9, bins[i], "Error for color {}".format(i))
+            except AssertionError as ae:
+                self.error_list.append(ae)
+        self.assertEqual([], self.error_list)
+
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
         scheme = word_highlighter.get_color_picking_scheme(scheme_string)
