@@ -99,6 +99,25 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
+    def test_color_picking_affected_by_frequencies(self):
+        cyclic_scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
+        cyclic_even_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
+        cyclic_even_ordered_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN_ORDERED")
+        random_even_scheme = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
+        self.collection.next_color_index() # Make sure that the first index is already taken
+        with patch.object(self.collection, "color_frequencies") as color_frequencies_mock:
+            # Fake that all colors are taken except for the first
+            frequencies = [1] * self.color_count
+            color_frequencies_mock.return_value = frequencies
+            frequencies[0] = 0
+            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(cyclic_scheme)), "Cyclic should always take the next irrespective of frequencies")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_scheme)), "Even schemes take the least occuring color")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_ordered_scheme)), "Even schemes take the least occuring color")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(random_even_scheme)), "Even schemes take the least occuring color")
+            frequencies[1] = 0
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_ordered_scheme)), "Ordered schemes take the first least occuring color")
+            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(cyclic_even_scheme)), "Not ordered schemes take the next least occuring color")
+
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
         scheme = word_highlighter.get_color_picking_scheme(scheme_string)
