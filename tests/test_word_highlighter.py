@@ -91,18 +91,35 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
         self.assertEqual([], self.error_list)
 
     def test_random(self):
-        bins = [0] * self.color_count
+        self.is_static = True
+        self.is_statically_incrementing = True
+        self.color_bins = [0] * self.color_count
+        self.incrementing_bins = [0] * self.color_count
+
+        def index_diff(old_index, new_index):
+            return (new_index - old_index) % self.color_count
+
         iterations_per_color = 1000
         iterations = iterations_per_color * self.color_count
+        new_index = self.get_color_index(self.collection.get_next_word_color(self.random_scheme))
+        old_index = self.get_color_index(self.collection.get_next_word_color(self.random_scheme))
+        old_diff = index_diff(old_index, new_index)
         for i in range(iterations):
-            index = self.get_color_index(self.collection.get_next_word_color(self.random_scheme))
-            bins[index] += 1
-        for i in range(self.color_count):
-            try:
-                self.assertLess(iterations_per_color*0.9, bins[i], "Error for color {}".format(i))
-            except AssertionError as ae:
-                self.error_list.append(ae)
-        self.assertEqual([], self.error_list)
+            new_index = self.get_color_index(self.collection.get_next_word_color(self.random_scheme))
+            new_diff = index_diff(old_index, new_index)
+            self.color_bins[new_index] += 1
+            self.incrementing_bins[new_diff] += 1
+            self.is_static = self.is_static and (old_index == new_index)
+            self.is_statically_incrementing = self.is_statically_incrementing and (old_diff == new_diff)
+            old_index = new_index
+            old_diff = new_diff
+
+        self.assertFalse(self.is_static)
+        self.assertFalse(self.is_statically_incrementing)
+        with self.assertRaises(ValueError):
+            self.color_bins.index(0)
+        with self.assertRaises(ValueError):
+            self.incrementing_bins.index(0)
 
     def test_color_picking_affected_by_frequencies(self):
         self.collection.next_color_index() # Make sure that the first index is already taken
