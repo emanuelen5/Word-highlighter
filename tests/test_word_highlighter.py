@@ -62,35 +62,40 @@ class TestHighlighting(SublimeText_TestCase):
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
 
 class TestColorPickingSchemes(WordHighlighter_TestCase):
+    def setUp(self):
+        super(TestColorPickingSchemes, self).setUp()
+        self.cyclic_scheme              = word_highlighter.get_color_picking_scheme("CYCLIC")
+        self.cyclic_even_scheme         = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
+        self.cyclic_even_ordered_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN_ORDERED")
+        self.random_scheme              = word_highlighter.get_color_picking_scheme("RANDOM")
+        self.random_even_scheme         = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
+
     def get_color_index(self, word):
         assert isinstance(word, word_highlighter.ColorType), "get_color_index: word is not a ColorType"
         return word_highlighter.SCOPE_COLORS.index(word.color_string)
 
     def test_cyclic(self):
-        scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
         for i in range(self.color_count):
             try:
-                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(scheme)), "Error for color {}".format(i))
+                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(self.cyclic_scheme)), "Error for color {}".format(i))
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
     def test_cyclic_even(self):
-        scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
         for i in range(self.color_count):
             try:
-                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(scheme)), "Error for color {}".format(i))
+                self.assertEqual(i, self.get_color_index(self.collection.get_next_word_color(self.cyclic_even_scheme)), "Error for color {}".format(i))
             except AssertionError as ae:
                 self.error_list.append(ae)
         self.assertEqual([], self.error_list)
 
     def test_random(self):
-        scheme = word_highlighter.get_color_picking_scheme("RANDOM")
         bins = [0] * self.color_count
         iterations_per_color = 1000
         iterations = iterations_per_color * self.color_count
         for i in range(iterations):
-            index = self.get_color_index(self.collection.get_next_word_color(scheme))
+            index = self.get_color_index(self.collection.get_next_word_color(self.random_scheme))
             bins[index] += 1
         for i in range(self.color_count):
             try:
@@ -100,23 +105,19 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
         self.assertEqual([], self.error_list)
 
     def test_color_picking_affected_by_frequencies(self):
-        cyclic_scheme = word_highlighter.get_color_picking_scheme("CYCLIC")
-        cyclic_even_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
-        cyclic_even_ordered_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN_ORDERED")
-        random_even_scheme = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
         self.collection.next_color_index() # Make sure that the first index is already taken
         with patch.object(self.collection, "color_frequencies") as color_frequencies_mock:
             # Fake that all colors are taken except for the first
             frequencies = [1] * self.color_count
             color_frequencies_mock.return_value = frequencies
             frequencies[0] = 0
-            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(cyclic_scheme)), "Cyclic should always take the next irrespective of frequencies")
-            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_scheme)), "Even schemes take the least occuring color")
-            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_ordered_scheme)), "Even schemes take the least occuring color")
-            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(random_even_scheme)), "Even schemes take the least occuring color")
+            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(self.cyclic_scheme)), "Cyclic should always take the next irrespective of frequencies")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(self.cyclic_even_scheme)), "Even schemes take the least occuring color")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(self.cyclic_even_ordered_scheme)), "Even schemes take the least occuring color")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(self.random_even_scheme)), "Even schemes take the least occuring color")
             frequencies[1] = 0
-            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(cyclic_even_ordered_scheme)), "Ordered schemes take the first least occuring color")
-            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(cyclic_even_scheme)), "Not ordered schemes take the next least occuring color")
+            self.assertEqual(0, self.get_color_index(self.collection.get_next_word_color(self.cyclic_even_ordered_scheme)), "Ordered schemes take the first least occuring color")
+            self.assertEqual(1, self.get_color_index(self.collection.get_next_word_color(self.cyclic_even_scheme)), "Not ordered schemes take the next least occuring color")
 
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
