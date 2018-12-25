@@ -56,30 +56,42 @@ def get_color_picking_scheme(name):
 
 # Instances that combine a word with a color scope
 class WordHighlight(object):
-    def __init__(self, word, match_by_word, color=UNSPECIFIED_COLOR):
-        assert isinstance(word, str)
+    def __init__(self, regex, color=UNSPECIFIED_COLOR, literal_match=False, match_by_word=False):
+        assert isinstance(regex, str)
         if isinstance(color, str):
             color = ColorType(color)
         elif not isinstance(color, ColorType):
             raise ValueError("Invalid color type")
-        self.word = word
-        self.match_by_word = match_by_word
+        self.input_regex = regex
+        self.regex = WordHighlight.convert_regex(regex, literal_match=literal_match, match_by_word=match_by_word)
         self.color = color
 
     def get_regex(self):
+        return self.regex
+
+    def get_input_regex(self):
+        return self.input_regex
+
+    def set_regex(self, regex):
+        self.input_regex = regex
+        self.regex = regex
+
+    @staticmethod
+    def convert_regex(regex, match_by_word=False, literal_match=False):
         import re
-        regex = re.escape(self.word)
-        # Some characters are "too" escaped for add_region to find them
-        regex = regex.replace("\\'", "'")
-        regex = regex.replace("\\`", "`")
-        regex = regex.replace("\\<", "<")
-        regex = regex.replace("\\>", ">")
-        if self.match_by_word:
+        if literal_match:
+            regex = re.escape(regex)
+            # Some characters are "too" escaped for add_region to find them
+            regex = regex.replace("\\'", "'")
+            regex = regex.replace("\\`", "`")
+            regex = regex.replace("\\<", "<")
+            regex = regex.replace("\\>", ">")
+        if match_by_word:
             regex = '\\b' + regex + '\\b'
         return regex
 
-    def matches_by_word(self):
-        return self.match_by_word
+    def find_all_regions(self, view):
+        return view.find_all(self.get_regex())
 
     def get_key(self):
         return self.color.color_string
@@ -95,10 +107,10 @@ class WordHighlight(object):
     def __eq__(self, right):
         if right is None: return False
         assert isinstance(right, WordHighlight)
-        return self.word == right.word and (self.color is UNSPECIFIED_COLOR or self.color == right.color)
+        return self.get_regex() == right.get_regex() and (self.color is UNSPECIFIED_COLOR or self.color == right.color)
 
     def __str__(self):
-        return "<{}:{}>".format(self.word, self.color)
+        return "<{}:{}>".format(self.get_regex(), self.color)
 
     def __hash__(self):
         return hash(str(self))
@@ -113,12 +125,12 @@ class WordHighlightCollection(object):
         self.removed_words = []
 
     def has_word(self, word):
-        return word.word in [w.word for w in self.words]
+        return word.get_regex() in [w.get_regex() for w in self.words]
 
     def get_word_highlight(self, word):
         assert isinstance(word, WordHighlight)
         for w in self.words:
-            if w.word == word.word: return w
+            if w.get_regex() == word.get_regex(): return w
         return None
 
     def update(self):
@@ -131,12 +143,12 @@ class WordHighlightCollection(object):
 
         keys = set((w.get_key() for w in self.words))
         for k in keys:
-            words = [w for w in self.words if w.get_key() == k]
-            regions = []
-            for w in words:
-                pattern = w.get_regex()
-                regions += self.view.find_all(pattern)
-            self.view.add_regions(k, regions, k)
+            all_regions = [w.find_all_regions(self.view) for w in self.words if w.get_key() == k]
+            # Create a list of regions from list of lists of regions
+            concatenated_regions = []
+            for r in all_regions:
+                concatenated_regions.extend(r)
+            self.view.add_regions(k, concatenated_regions, k)
 
     def color_frequencies(self):
         freqs = [0]*len(SCOPE_COLORS)
@@ -294,7 +306,7 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
     def _run(self, index=0):
         self.load_collection()
         words = [w for w in self.collection.words]
-        word_strings = [w.word for w in words]
+        word_strings = [w.get_input_regex() for w in words]
         self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
 
     def run(self, edit, index=0):
@@ -313,7 +325,7 @@ def restore_collection(view):
                 unique_words |= set(((word, matches_whole_word), ))
         for w in unique_words:
             logging.info("Restoring word: '{}'".format(w[0]))
-            collection._add_word(WordHighlight(*w, color=s))
+            collection._add_word(WordHighlight(w[0], color=s, match_by_word=w[1]))
     return collection
 
 # Expand the point to a region that contains a word, or an empty Region if
@@ -378,10 +390,10 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
                 txt = self.view.substr(r)
                 if txt != '':
                     logging.debug("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(WordHighlight(txt, match_by_word=True))
+                    text_selections.append(WordHighlight(txt, match_by_word=True, literal_match=True))
             # Keep non-empty selections as-is
             else:
-                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False))
+                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False, literal_match=True))
         # Get unique items
         text_selections = list(set(text_selections))
 
@@ -393,3 +405,30 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
             self.collection.toggle_word(w)
         self.collection.update()
         self.save_collection()
+
+
+class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin):
+    '''
+    Edit an existing regexp via an input panel
+    '''
+    def run(self, edit):
+        self.load_collection()
+        words = self.collection.words
+        # Check if current point is placed on a region
+        sel = self.view.sel()
+        for w in words:
+            word_regions = w.find_all_regions(self.view)
+            for sr in sel:
+                if any([wr.intersects(sr) for wr in word_regions]):
+                    self.view.window().show_input_panel("Edit regexp", w.get_regex(), self.create_on_done(w), None, None)
+
+    def create_on_done(self, word):
+        def on_done(text):
+            return self.set_word_regex(word, text)
+        return on_done
+
+    @update_collection_nonreentrant
+    def set_word_regex(self, word, text):
+        w = self.collection.get_word_highlight(word)
+        w.set_regex(text)
+        self.collection.update()
