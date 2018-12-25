@@ -72,6 +72,10 @@ class WordHighlight(object):
     def get_input_regex(self):
         return self.input_regex
 
+    def set_regex(self, regex):
+        self.input_regex = regex
+        self.regex = regex
+
     @staticmethod
     def convert_regex(regex, match_by_word=False, literal_match=False):
         import re
@@ -420,8 +424,11 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin)
 
     def create_on_done(self, word):
         def on_done(text):
-            return self.on_done(text, word)
+            return self.set_word_regex(word, text)
         return on_done
 
-    def on_done(self, text, word):
-        logging.debug("Done with input menu for word {}. Got text {}".format(word, text))
+    @update_collection_nonreentrant
+    def set_word_regex(self, word, text):
+        w = self.collection.get_word_highlight(word)
+        w.set_regex(text)
+        self.collection.update()
