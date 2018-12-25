@@ -62,11 +62,15 @@ class WordHighlight(object):
             color = ColorType(color)
         elif not isinstance(color, ColorType):
             raise ValueError("Invalid color type")
+        self.input_regex = regex
         self.regex = WordHighlight.convert_regex(regex, literal_match=literal_match, match_by_word=match_by_word)
         self.color = color
 
     def get_regex(self):
         return self.regex
+
+    def get_input_regex(self):
+        return self.input_regex
 
     @staticmethod
     def convert_regex(regex, match_by_word=False, literal_match=False):
@@ -298,7 +302,7 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
     def _run(self, index=0):
         self.load_collection()
         words = [w for w in self.collection.words]
-        word_strings = [w.get_regex() for w in words]
+        word_strings = [w.get_input_regex() for w in words]
         self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
 
     def run(self, edit, index=0):
