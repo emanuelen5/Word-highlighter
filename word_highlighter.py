@@ -256,9 +256,7 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     def on_modified(self):
         if self.debouncer is not None:
             self.debouncer.cancel()
-        def update_highlighting_f():
-            self.update_highlighting()
-        self.debouncer = threading.Timer(self.debounce_time, update_highlighting_f)
+        self.debouncer = threading.Timer(self.debounce_time, self.update_highlighting)
         self.debouncer.start()
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand):
