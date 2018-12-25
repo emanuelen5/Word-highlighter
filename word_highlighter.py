@@ -110,6 +110,7 @@ class WordHighlightCollection(object):
         self.words = []
         self.view = view
         self.color_index = 0
+        self.removed_words = []
 
     def has_word(self, word):
         return word.word in [w.word for w in self.words]
@@ -122,6 +123,12 @@ class WordHighlightCollection(object):
 
     def update(self):
         import re
+
+        keys = set((w.get_key() for w in self.removed_words))
+        for key in keys:
+            self.view.erase_regions(key)
+        self.removed_words.clear()
+
         keys = set((w.get_key() for w in self.words))
         for k in keys:
             words = [w for w in self.words if w.get_key() == k]
@@ -189,14 +196,15 @@ class WordHighlightCollection(object):
         assert isinstance(word, WordHighlight)
         if self.has_word(word):
             w = self.get_word_highlight(word)
-            self.view.erase_regions(w.get_key())
             self.words.remove(w)
+            self.removed_words.append(w)
 
     def clear(self):
-        words = [w for w in self.words]
-        for w in words:
-            self._remove_word(w)
         logging.debug("Clearing all highlighted words")
+        self.words.clear()
+        self.removed_words.clear()
+        for k in SCOPE_COLORS:
+            self.view.erase_regions(k)
 
     def dumps(self):
         import pickle
@@ -276,6 +284,7 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
     @update_collection_nonreentrant
     def _clear_word(self, original_words, chosen_index):
         self.collection._remove_word(original_words[chosen_index])
+        self.collection.update()
 
     def clear_word(self, original_words, chosen_index):
         if chosen_index == sublime.INDEX_NONE_CHOSEN:
