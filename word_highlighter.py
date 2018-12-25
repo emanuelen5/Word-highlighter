@@ -78,6 +78,9 @@ class WordHighlight(object):
             regex = '\\b' + regex + '\\b'
         return regex
 
+    def find_all_regions(self, view):
+        return view.find_all(self.get_regex())
+
     def matches_by_word(self):
         return self.match_by_word
 
@@ -131,12 +134,12 @@ class WordHighlightCollection(object):
 
         keys = set((w.get_key() for w in self.words))
         for k in keys:
-            words = [w for w in self.words if w.get_key() == k]
-            regions = []
-            for w in words:
-                pattern = w.get_regex()
-                regions += self.view.find_all(pattern)
-            self.view.add_regions(k, regions, k)
+            all_regions = [w.find_all_regions(self.view) for w in self.words if w.get_key() == k]
+            # Create a list of regions from list of lists of regions
+            concatenated_regions = []
+            for r in all_regions:
+                concatenated_regions.extend(r)
+            self.view.add_regions(k, concatenated_regions, k)
 
     def color_frequencies(self):
         freqs = [0]*len(SCOPE_COLORS)
