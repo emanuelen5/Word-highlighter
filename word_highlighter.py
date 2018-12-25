@@ -393,3 +393,14 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
             self.collection.toggle_word(w)
         self.collection.update()
         self.save_collection()
+
+
+class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin):
+    '''
+    Edit an existing regexp via an input panel
+    '''
+    def run(self, edit):
+        self.view.window().show_input_panel("Edit regexp", "PLACEHOLDER", self.on_done, None, None)
+
+    def on_done(self, text):
+        logging.debug("Done with input menu")

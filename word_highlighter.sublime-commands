@@ -11,4 +11,8 @@
         "caption": "Word Highlighter: Open clear list",
         "command": "word_highlighter_clear_menu"
     },
+    {
+        "caption": "Word Highlighter: Edit regexp",
+        "command": "word_highlighter_edit_regexp"
+    },
 ]
