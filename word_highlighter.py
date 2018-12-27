@@ -362,10 +362,9 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
     """
     def __init__(self, view):
         self.view = view
-        collection = WordHighlightCollection.restore(view)
-        collection.update()
-        # Save the instance globally for the buffer
-        self.view.settings().set("wordhighlighter_collection", collection.dumps())
+        self.collection = WordHighlightCollection.restore(view)
+        self.collection.update()
+        self.save_collection()
 
     # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
     # re.compile(string, re.IGNORECASE)
