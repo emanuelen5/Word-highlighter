@@ -194,7 +194,7 @@ class TestRestoreCollection(SublimeText_TestCase):
     def test_whole_word(self):
         self.set_buffer("word")
         self.view.add_regions(self.key_name, [sublime.Region(0,4)], self.scope_name)
-        collection = word_highlighter.restore_collection(self.view)
+        collection = word_highlighter.WordHighlightCollection.restore(self.view)
         self.assertEqual(1, len(collection.words))
         word = collection.words[0]
         self.assertIsInstance(word, word_highlighter.WordHighlight)
@@ -205,7 +205,7 @@ class TestRestoreCollection(SublimeText_TestCase):
     def test_partial_word(self):
         self.set_buffer("word")
         self.view.add_regions(self.key_name, [sublime.Region(0,3)], self.scope_name)
-        collection = word_highlighter.restore_collection(self.view)
+        collection = word_highlighter.WordHighlightCollection.restore(self.view)
         self.assertEqual(1, len(collection.words))
         word = collection.words[0]
         self.assertIsInstance(word, word_highlighter.WordHighlight)

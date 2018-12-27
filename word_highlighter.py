@@ -229,6 +229,23 @@ class WordHighlightCollection(object):
         assert isinstance(instance, cls)
         return instance
 
+    @classmethod
+    def restore(cls, view):
+        collection = cls(view)
+        for s in SCOPE_COLORS:
+            regions = view.get_regions(s)
+            unique_words = set()
+            if len(regions):
+                for r in regions:
+                    word = view.substr(r)
+                    whole_word = view.substr(expand_to_word(view, r.begin()))
+                    matches_whole_word = (word == whole_word)
+                    unique_words |= set(((word, matches_whole_word), ))
+            for w in unique_words:
+                logging.info("Restoring word: '{}'".format(w[0]))
+                collection._add_word(WordHighlight(w[0], color=s, match_by_word=w[1]))
+        return collection
+
 class CollectionableMixin(object):
     def load_collection(self):
         s = self.view.settings()
@@ -312,22 +329,6 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
     def run(self, edit, index=0):
         self._run(index)
 
-def restore_collection(view):
-    collection = WordHighlightCollection(view)
-    for s in SCOPE_COLORS:
-        regions = view.get_regions(s)
-        unique_words = set()
-        if len(regions):
-            for r in regions:
-                word = view.substr(r)
-                whole_word = view.substr(expand_to_word(view, r.begin()))
-                matches_whole_word = (word == whole_word)
-                unique_words |= set(((word, matches_whole_word), ))
-        for w in unique_words:
-            logging.info("Restoring word: '{}'".format(w[0]))
-            collection._add_word(WordHighlight(w[0], color=s, match_by_word=w[1]))
-    return collection
-
 # Expand the point to a region that contains a word, or an empty Region if
 # the point is not placed at a word.
 def expand_to_word(view, point):
@@ -366,7 +367,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
     """
     def __init__(self, view):
         self.view = view
-        collection = restore_collection(view)
+        collection = WordHighlightCollection.restore(view)
         collection.update()
         # Save the instance globally for the buffer
         self.view.settings().set("wordhighlighter_collection", collection.dumps())
