@@ -255,15 +255,16 @@ class CollectionableMixin(object):
         s = self.view.settings()
         s.set("wordhighlighter_collection", self.collection.dumps())
 
-# Updates the collection for the object (makes the function not re-entrant!)
-def update_collection_nonreentrant(function):
-    def wrap(self, *args, **kwargs):
-        s = self.view.settings()
-        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
-        ret_value = function(self, *args, **kwargs)
-        s.set("wordhighlighter_collection", self.collection.dumps())
-        return ret_value
-    return wrap
+    # Updates the collection for the object before entry and saves after exit
+    # @note non-re-entrant!
+    @classmethod
+    def update_collection_nonreentrant(cls, function):
+        def wrap(self, *args, **kwargs):
+            self.load_collection()
+            ret_value = function(self, *args, **kwargs)
+            self.save_collection()
+            return ret_value
+        return wrap
 
 class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
