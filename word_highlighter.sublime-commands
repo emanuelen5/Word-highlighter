@@ -1,18 +1,18 @@
 [
 	{
-		"caption": "Word Highlighter: Highlight instances of selection",
+		"caption": "Word Highlighter: Toggle highlight of selection",
 		"command": "word_highlighter_highlight_instances_of_selection"
 	},
     {
-        "caption": "Word Highlighter: Clear highlighting",
+        "caption": "Word Highlighter: Clear all highlighting",
         "command": "word_highlighter_clear_instances"
     },
     {
-        "caption": "Word Highlighter: Open clear list",
+        "caption": "Word Highlighter: Clear menu",
         "command": "word_highlighter_clear_menu"
     },
     {
-        "caption": "Word Highlighter: Edit regexp",
+        "caption": "Word Highlighter: Edit regexp for highlight at cursor",
         "command": "word_highlighter_edit_regexp"
     },
 ]
