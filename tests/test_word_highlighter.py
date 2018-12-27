@@ -200,7 +200,6 @@ class TestRestoreCollection(SublimeText_TestCase):
         self.assertIsInstance(word, word_highlighter.WordHighlight)
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
-        self.assertEqual(True, word.matches_by_word())
 
     def test_partial_word(self):
         self.set_buffer("word")
@@ -211,7 +210,6 @@ class TestRestoreCollection(SublimeText_TestCase):
         self.assertIsInstance(word, word_highlighter.WordHighlight)
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
-        self.assertEqual(False, word.matches_by_word())
 
 def clip(min_val, val, max_val):
     return min(max(min_val, val), max_val)
