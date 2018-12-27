@@ -20,12 +20,6 @@ def bits_set(value, *bits):
     bit_mask = reduce(lambda x,y: x | y, bits)
     return (value & bit_mask) == bit_mask
 
-# Check that select bits are not set
-def bits_not_set(value, *bits):
-    from functools import reduce
-    bit_mask = reduce(lambda x,y: x | y, bits)
-    return (value & bit_mask) == 0
-
 ## Define some color constants
 class ColorType(object):
     def __init__(self, color_string):
