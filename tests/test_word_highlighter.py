@@ -149,14 +149,14 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
 
 class TestCollection(WordHighlighter_TestCase):
     def test_toggle_word(self):
-        word = word_highlighter.WordHighlight("asd", False)
+        word = word_highlighter.WordHighlight("asd", match_by_word=False)
         self.collection.toggle_word(word)
         self.assertEqual([word], self.collection.words)
         self.collection.toggle_word(word)
         self.assertEqual([], self.collection.words)
 
     def test_clear_words(self):
-        word = word_highlighter.WordHighlight("asd", False)
+        word = word_highlighter.WordHighlight("asd", match_by_word=False)
         self.collection.toggle_word(word)
         self.collection.clear()
         self.assertEqual([], self.collection.words)
