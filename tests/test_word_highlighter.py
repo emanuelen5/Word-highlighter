@@ -38,6 +38,12 @@ class TestHighlighting(SublimeText_TestCase):
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
 
+    def get_highlighted_regions(self):
+        highlighted_regions = []
+        for key in word_highlighter.SCOPE_COLORS:
+            highlighted_regions += self.view.get_regions(key)
+        return highlighted_regions
+
     def check_character(self, c):
         self.set_buffer(c)
         # Select the only character in the buffer
@@ -46,9 +52,9 @@ class TestHighlighting(SublimeText_TestCase):
         s.add(sublime.Region(0,1))
         # Highlight the selection
         self.view.run_command("word_highlighter_highlight_instances_of_selection")
-        regions = self.view.get_regions(word_highlighter.SCOPE_COLORS[0])
-        self.assertEqual(1, len(regions), "A word should be highlighted")
-        self.assertEqual(region_to_list(sublime.Region(0,1)), region_to_list(regions[0]), "The first word should be highlighted")
+        highlighted_regions = self.get_highlighted_regions()
+        self.assertEqual(1, len(highlighted_regions), "A word should be highlighted")
+        self.assertEqual(region_to_list(sublime.Region(0,1)), region_to_list(highlighted_regions[0]), "The first word should be highlighted")
 
     def test_highlight_characters(self):
         chars = [chr(i) for i in range(0x20, 0x7f)]
