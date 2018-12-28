@@ -272,7 +272,7 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
         self.debouncer = None
         logging.debug("Debounce time: {}".format(self.debounce_time))
 
-    @update_collection_nonreentrant
+    @CollectionableMixin.update_collection_nonreentrant
     def update_highlighting(self):
         logging.debug("Updating highlighting")
         self.collection.update()
@@ -287,7 +287,7 @@ class wordHighlighterClearInstances(sublime_plugin.TextCommand):
     def __init__(self, view):
         self.view = view
 
-    @update_collection_nonreentrant
+    @CollectionableMixin.update_collection_nonreentrant
     def run(self, edit):
         self.collection.clear()
 
@@ -303,7 +303,7 @@ sublime.INDEX_NONE_CHOSEN = -1
 
 # Menu for clearing highlighted words
 class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
-    @update_collection_nonreentrant
+    @CollectionableMixin.update_collection_nonreentrant
     def _clear_word(self, original_words, chosen_index):
         self.collection._remove_word(original_words[chosen_index])
         self.collection.update()
@@ -422,7 +422,7 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin)
             return self.set_word_regex(word, text)
         return on_done
 
-    @update_collection_nonreentrant
+    @CollectionableMixin.update_collection_nonreentrant
     def set_word_regex(self, word, text):
         w = self.collection.get_word_highlight(word)
         w.set_regex(text)
