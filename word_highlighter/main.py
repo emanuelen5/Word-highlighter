@@ -14,6 +14,10 @@ logging.info("Starting module")
 # Add some base colors to use for selections (perhaps read from settings file)
 SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
 
+settings = sublime.load_settings("word_highlighter.sublime-settings")
+logging.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
+logging.info("Debounce time: {}".format(settings.get("debounce")))
+
 # Check that select bits are set
 def bits_set(value, *bits):
     from functools import reduce
@@ -266,11 +270,9 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
     def __init__(self, view):
         self.view = view
-        logging.info("Initializing updater instance...")
         settings = sublime.load_settings("word_highlighter.sublime-settings")
         self.debounce_time = settings.get("debounce")
         self.debouncer = None
-        logging.debug("Debounce time: {}".format(self.debounce_time))
 
     @CollectionableMixin.update_collection_nonreentrant
     def update_highlighting(self):
