@@ -1,6 +1,7 @@
 import unittest
 import sublime
 from unittest.mock import MagicMock, patch
+import word_highlighter.main as word_highlighter
 
 def region_to_list(region):
     assert isinstance(region, sublime.Region)
@@ -251,11 +252,3 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
             mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
             self.wordHighlighterClearMenu._run()
         self.assertEqual(4, len(show_quick_panel_mock.mock_calls))
-
-## For testing internal functions
-import sys
-version = sublime.version()
-if version < '3000':
-    word_highlighter = sys.modules["word_highlighter"]
-else:
-    word_highlighter = sys.modules["Word-highlighter.word_highlighter"]
