@@ -283,7 +283,7 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
         self.debouncer = threading.Timer(self.debounce_time, self.update_highlighting)
         self.debouncer.start()
 
-class wordHighlighterClearInstances(sublime_plugin.TextCommand):
+class wordHighlighterClearInstances(sublime_plugin.TextCommand, CollectionableMixin):
     def __init__(self, view):
         self.view = view
 
