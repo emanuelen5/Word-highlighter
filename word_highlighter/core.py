@@ -197,16 +197,18 @@ class WordHighlightCollection(object):
         for k in SCOPE_COLORS:
             self.view.erase_regions(k)
 
-    def dumps(self):
-        import pickle
-        return pickle.dumps(self)
-
     @classmethod
-    def loads(cls, s):
+    def load(cls, view):
         import pickle
-        instance = pickle.loads(bytes(s))
+        collection_stream = view.settings().get("wordhighlighter_collection")
+        instance = pickle.loads(bytes(collection_stream))
         assert isinstance(instance, cls)
         return instance
+
+    def save(self):
+        import pickle
+        collection_stream = pickle.dumps(self)
+        self.view.settings().set("wordhighlighter_collection", collection_stream)
 
     @classmethod
     def restore(cls, view):
@@ -259,12 +261,10 @@ def expand_to_word(view, point):
 
 class CollectionableMixin(object):
     def load_collection(self):
-        s = self.view.settings()
-        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
+        self.collection = WordHighlightCollection.load(self.view)
 
     def save_collection(self):
-        s = self.view.settings()
-        s.set("wordhighlighter_collection", self.collection.dumps())
+        self.collection.save()
 
     # Updates the collection for the object before entry and saves after exit
     # @note non-re-entrant!

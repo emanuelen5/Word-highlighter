@@ -26,7 +26,7 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
         self.collection._add_word(core.WordHighlight("word1", match_by_word=True))
         self.collection._add_word(core.WordHighlight("word2", match_by_word=True))
         self.collection._add_word(core.WordHighlight("word3", match_by_word=True))
-        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
+        self.collection.save()
 
         # Mocks the quick panel call and returns index of last item
         def show_quick_panel_mock_call__select_last_item(items, callback, *args, selected_index=0, **kwargs):
@@ -46,7 +46,7 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase):
         # Set collection to point out word
         self.set_buffer("word1 word2 word3")
         self.collection._add_word(core.WordHighlight("word1"))
-        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
+        self.collection.save()
         self.view.sel().clear()
 
     def assertInputNewRegexIsCalled(self):

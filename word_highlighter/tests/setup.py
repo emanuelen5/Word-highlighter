@@ -21,6 +21,5 @@ class WordHighlighter_TestCase(SublimeText_TestCase):
         super(WordHighlighter_TestCase, self).setUp()
         self.collection = core.WordHighlightCollection(self.view)
         # Need to set up a saved serialized wordhighlighter_collection to make it in the same state as main script
-        s = self.view.settings()
-        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
+        self.collection.save()
         self.color_count = len(core.SCOPE_COLORS)
