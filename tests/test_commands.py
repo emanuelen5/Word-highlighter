@@ -2,7 +2,7 @@ import sublime
 from unittest.mock import MagicMock, patch
 import word_highlighter.commands as commands
 import word_highlighter.core as core
-from tests.setup import WordHighlighter_TestCase
+from word_highlighter.tests.setup import WordHighlighter_TestCase
 
 def clip(min_val, val, max_val):
     return min(max(min_val, val), max_val)

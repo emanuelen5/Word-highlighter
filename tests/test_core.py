@@ -1,7 +1,7 @@
 import sublime
 from unittest.mock import patch
 import word_highlighter.core as core
-from tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
+from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 def region_to_list(region):
     assert isinstance(region, sublime.Region)
