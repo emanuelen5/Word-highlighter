@@ -18,6 +18,7 @@ def get_logfile_path(filename):
 
 def get_logger(module_name, file_name):
     logger = logging.getLogger(module_name)
+    logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(get_logfile_path(file_name), mode='w')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s'))

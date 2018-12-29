@@ -1,9 +1,7 @@
-import unittest
 import sublime
-from unittest.mock import MagicMock, patch
-import word_highlighter.commands as commands
+from unittest.mock import patch
 import word_highlighter.core as core
-import word_highlighter.helpers as helpers
+from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 def region_to_list(region):
     assert isinstance(region, sublime.Region)
@@ -11,29 +9,6 @@ def region_to_list(region):
 
 def get_scope_color(index):
     return core.SCOPE_COLORS[index % len(core.SCOPE_COLORS)]
-
-class SublimeText_TestCase(unittest.TestCase):
-    def setUp(self):
-        self.window = sublime.active_window()
-        self.view = self.window.new_file()
-        self.view.set_scratch(True)
-        self.error_list = []
-        self.maxDiff = None # Verbose printouts if error
-
-    def tearDown(self):
-        self.view.close()
-
-    def set_buffer(self, string):
-        self.view.run_command("overwrite", {"characters": string})
-
-class WordHighlighter_TestCase(SublimeText_TestCase):
-    def setUp(self):
-        super(WordHighlighter_TestCase, self).setUp()
-        self.collection = core.WordHighlightCollection(self.view)
-        # Need to set up a saved serialized wordhighlighter_collection to make it in the same state as main script
-        s = self.view.settings()
-        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
-        self.color_count = len(core.SCOPE_COLORS)
 
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
@@ -219,38 +194,3 @@ class TestRestoreCollection(SublimeText_TestCase):
         self.assertIsInstance(word, core.WordHighlight)
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
-
-def clip(min_val, val, max_val):
-    return min(max(min_val, val), max_val)
-
-class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
-    def setUp(self):
-        super(TestWordHighlighterClearMenu, self).setUp()
-        self.wordHighlighterClearMenu = commands.wordHighlighterClearMenu(self.view)
-
-    def test_quick_panel_is_called(self):
-        self.set_buffer("")
-        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
-            show_quick_panel_mock = MagicMock(side_effect=(None))
-            mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
-            self.wordHighlighterClearMenu._run()
-        self.assertEqual(1, len(show_quick_panel_mock.mock_calls))
-
-    def test_clearing_all_words(self):
-        # Add some words and highlight them
-        self.set_buffer("word1 word2 word3")
-        self.collection._add_word(core.WordHighlight("word1", match_by_word=True))
-        self.collection._add_word(core.WordHighlight("word2", match_by_word=True))
-        self.collection._add_word(core.WordHighlight("word3", match_by_word=True))
-        self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
-
-        # Mocks the quick panel call and returns index of last item
-        def show_quick_panel_mock_call__select_last_item(items, callback, *args, selected_index=0, **kwargs):
-            return callback(clip(-1, selected_index, len(items)-1))
-
-        # Do the actual testing
-        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
-            show_quick_panel_mock = MagicMock(side_effect=show_quick_panel_mock_call__select_last_item)
-            mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
-            self.wordHighlighterClearMenu._run()
-        self.assertEqual(4, len(show_quick_panel_mock.mock_calls))

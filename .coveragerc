@@ -1,0 +1,4 @@
+[report]
+omit =
+    */Word-highlighter/tests/*
+    */Word-highlighter/word_highlighter/tests/*
