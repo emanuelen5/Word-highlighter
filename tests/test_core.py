@@ -3,48 +3,6 @@ from unittest.mock import patch
 import word_highlighter.core as core
 from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
-def region_to_list(region):
-    assert isinstance(region, sublime.Region)
-    return [region.begin(), region.end()]
-
-def get_scope_color(index):
-    return core.SCOPE_COLORS[index % len(core.SCOPE_COLORS)]
-
-class TestHighlighting(SublimeText_TestCase):
-    def setUp(self):
-        super(TestHighlighting, self).setUp()
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
-        settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
-
-    def get_highlighted_regions(self):
-        highlighted_regions = []
-        for key in core.SCOPE_COLORS:
-            highlighted_regions += self.view.get_regions(key)
-        return highlighted_regions
-
-    def check_character(self, c):
-        self.set_buffer(c)
-        # Select the only character in the buffer
-        s = self.view.sel()
-        s.clear()
-        s.add(sublime.Region(0,1))
-        # Highlight the selection
-        self.view.run_command("word_highlighter_highlight_instances_of_selection")
-        highlighted_regions = self.get_highlighted_regions()
-        self.assertEqual(1, len(highlighted_regions), "A word should be highlighted")
-        self.assertEqual(region_to_list(sublime.Region(0,1)), region_to_list(highlighted_regions[0]), "The first word should be highlighted")
-
-    def test_highlight_characters(self):
-        chars = [chr(i) for i in range(0x20, 0x7f)]
-        chars += ['\r', '\n']
-        for i, c in enumerate(chars):
-            try:
-                self.view.run_command("word_highlighter_clear_instances")
-                self.check_character(c)
-            except AssertionError as e:
-                self.error_list.append("'{}' - Error: '{}'".format(c,e))
-        self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
-
 class TestColorPickingSchemes(WordHighlighter_TestCase):
     def setUp(self):
         super(TestColorPickingSchemes, self).setUp()
