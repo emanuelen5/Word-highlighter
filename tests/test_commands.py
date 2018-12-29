@@ -15,10 +15,9 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
     def test_quick_panel_is_called(self):
         self.set_buffer("")
         with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
-            show_quick_panel_mock = MagicMock(side_effect=(None))
-            mock_window_method.return_value = MagicMock(show_quick_panel=show_quick_panel_mock)
+            mock_window_method.return_value.show_quick_panel.side_effect=(None)
             self.wordHighlighterClearMenu._run()
-        self.assertEqual(1, len(show_quick_panel_mock.mock_calls))
+        self.assertTrue(mock_window_method.return_value.show_quick_panel.called)
 
     def test_clearing_all_words(self):
         # Add some words and highlight them
@@ -34,10 +33,9 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
 
         # Do the actual testing
         with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
-            show_quick_panel_mock = MagicMock(side_effect=show_quick_panel_mock_call__select_last_item)
-            mock_window_method.return_value=MagicMock(show_quick_panel=show_quick_panel_mock)
+            mock_window_method.return_value.show_quick_panel.side_effect = show_quick_panel_mock_call__select_last_item
             self.wordHighlighterClearMenu._run()
-        self.assertEqual(4, len(show_quick_panel_mock.mock_calls))
+        self.assertEqual(4, len(mock_window_method.return_value.show_quick_panel.mock_calls))
 
 class TestWordHighlighterEditRegexp(WordHighlighter_TestCase):
     def setUp(self):
