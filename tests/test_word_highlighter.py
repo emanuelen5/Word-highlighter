@@ -1,14 +1,16 @@
 import unittest
 import sublime
 from unittest.mock import MagicMock, patch
-import word_highlighter.main as word_highlighter
+import word_highlighter.commands as commands
+import word_highlighter.core as core
+import word_highlighter.helpers as helpers
 
 def region_to_list(region):
     assert isinstance(region, sublime.Region)
     return [region.begin(), region.end()]
 
 def get_scope_color(index):
-    return word_highlighter.SCOPE_COLORS[index % len(word_highlighter.SCOPE_COLORS)]
+    return core.SCOPE_COLORS[index % len(core.SCOPE_COLORS)]
 
 class SublimeText_TestCase(unittest.TestCase):
     def setUp(self):
@@ -27,11 +29,11 @@ class SublimeText_TestCase(unittest.TestCase):
 class WordHighlighter_TestCase(SublimeText_TestCase):
     def setUp(self):
         super(WordHighlighter_TestCase, self).setUp()
-        self.collection = word_highlighter.WordHighlightCollection(self.view)
+        self.collection = core.WordHighlightCollection(self.view)
         # Need to set up a saved serialized wordhighlighter_collection to make it in the same state as main script
         s = self.view.settings()
         self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
-        self.color_count = len(word_highlighter.SCOPE_COLORS)
+        self.color_count = len(core.SCOPE_COLORS)
 
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
@@ -41,7 +43,7 @@ class TestHighlighting(SublimeText_TestCase):
 
     def get_highlighted_regions(self):
         highlighted_regions = []
-        for key in word_highlighter.SCOPE_COLORS:
+        for key in core.SCOPE_COLORS:
             highlighted_regions += self.view.get_regions(key)
         return highlighted_regions
 
@@ -71,15 +73,15 @@ class TestHighlighting(SublimeText_TestCase):
 class TestColorPickingSchemes(WordHighlighter_TestCase):
     def setUp(self):
         super(TestColorPickingSchemes, self).setUp()
-        self.cyclic_scheme              = word_highlighter.get_color_picking_scheme("CYCLIC")
-        self.cyclic_even_scheme         = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN")
-        self.cyclic_even_ordered_scheme = word_highlighter.get_color_picking_scheme("CYCLIC_EVEN_ORDERED")
-        self.random_scheme              = word_highlighter.get_color_picking_scheme("RANDOM")
-        self.random_even_scheme         = word_highlighter.get_color_picking_scheme("RANDOM_EVEN")
+        self.cyclic_scheme              = core.get_color_picking_scheme("CYCLIC")
+        self.cyclic_even_scheme         = core.get_color_picking_scheme("CYCLIC_EVEN")
+        self.cyclic_even_ordered_scheme = core.get_color_picking_scheme("CYCLIC_EVEN_ORDERED")
+        self.random_scheme              = core.get_color_picking_scheme("RANDOM")
+        self.random_even_scheme         = core.get_color_picking_scheme("RANDOM_EVEN")
 
     def get_color_index(self, word):
-        assert isinstance(word, word_highlighter.ColorType), "get_color_index: word is not a ColorType"
-        return word_highlighter.SCOPE_COLORS.index(word.color_string)
+        assert isinstance(word, core.ColorType), "get_color_index: word is not a ColorType"
+        return core.SCOPE_COLORS.index(word.color_string)
 
     def test_cyclic(self):
         for i in range(self.color_count):
@@ -145,25 +147,25 @@ class TestColorPickingSchemes(WordHighlighter_TestCase):
 
     def test_get_color_picking_schemes_invalid(self):
         scheme_string = "Not a valid color picking scheme string"
-        scheme = word_highlighter.get_color_picking_scheme(scheme_string)
-        self.assertIsInstance(scheme, word_highlighter.ColorType)
-        self.assertNotIn(scheme_string, word_highlighter.color_schemes, "Does not already exist as a color picking scheme")
-        self.assertIn(scheme.color_string, word_highlighter.color_schemes, "Resolves to correct color picking scheme")
+        scheme = core.get_color_picking_scheme(scheme_string)
+        self.assertIsInstance(scheme, core.ColorType)
+        self.assertNotIn(scheme_string, core.color_schemes, "Does not already exist as a color picking scheme")
+        self.assertIn(scheme.color_string, core.color_schemes, "Resolves to correct color picking scheme")
 
     def test_get_color_picking_schemes(self):
-        for scheme_string in word_highlighter.color_schemes.keys():
-            self.assertIs(word_highlighter.color_schemes[scheme_string], word_highlighter.get_color_picking_scheme(scheme_string))
+        for scheme_string in core.color_schemes.keys():
+            self.assertIs(core.color_schemes[scheme_string], core.get_color_picking_scheme(scheme_string))
 
 class TestCollection(WordHighlighter_TestCase):
     def test_toggle_word(self):
-        word = word_highlighter.WordHighlight("asd", match_by_word=False)
+        word = core.WordHighlight("asd", match_by_word=False)
         self.collection.toggle_word(word)
         self.assertEqual([word], self.collection.words)
         self.collection.toggle_word(word)
         self.assertEqual([], self.collection.words)
 
     def test_clear_words(self):
-        word = word_highlighter.WordHighlight("asd", match_by_word=False)
+        word = core.WordHighlight("asd", match_by_word=False)
         self.collection.toggle_word(word)
         self.collection.clear()
         self.assertEqual([], self.collection.words)
@@ -171,28 +173,28 @@ class TestCollection(WordHighlighter_TestCase):
 class TestExpandToWordSimple(SublimeText_TestCase):
     def test_start_of_word(self):
         self.set_buffer("word")
-        self.region = word_highlighter.expand_to_word(self.view, 0)
+        self.region = core.expand_to_word(self.view, 0)
         self.assertEqual(sublime.Region(0, 4), self.region)
 
     def test_end_of_word(self):
         self.set_buffer("word")
-        self.region = word_highlighter.expand_to_word(self.view, 4)
+        self.region = core.expand_to_word(self.view, 4)
         self.assertEqual(sublime.Region(0, 4), self.region)
 
     def test_middle_of_word(self):
         self.set_buffer("word")
-        self.region = word_highlighter.expand_to_word(self.view, 1)
+        self.region = core.expand_to_word(self.view, 1)
         self.assertEqual(sublime.Region(0, 4), self.region)
 
     def test_no_word(self):
         self.set_buffer(" ")
-        self.region = word_highlighter.expand_to_word(self.view, 1)
+        self.region = core.expand_to_word(self.view, 1)
         self.assertEqual(sublime.Region(1, 1), self.region)
 
 class TestRestoreCollection(SublimeText_TestCase):
     def setUp(self):
         super(TestRestoreCollection, self).setUp()
-        self.scope_name = self.key_name = word_highlighter.SCOPE_COLORS[0]
+        self.scope_name = self.key_name = core.SCOPE_COLORS[0]
 
     def tearDown(self):
         super(TestRestoreCollection, self).tearDown()
@@ -201,20 +203,20 @@ class TestRestoreCollection(SublimeText_TestCase):
     def test_whole_word(self):
         self.set_buffer("word")
         self.view.add_regions(self.key_name, [sublime.Region(0,4)], self.scope_name)
-        collection = word_highlighter.WordHighlightCollection.restore(self.view)
+        collection = core.WordHighlightCollection.restore(self.view)
         self.assertEqual(1, len(collection.words))
         word = collection.words[0]
-        self.assertIsInstance(word, word_highlighter.WordHighlight)
+        self.assertIsInstance(word, core.WordHighlight)
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
 
     def test_partial_word(self):
         self.set_buffer("word")
         self.view.add_regions(self.key_name, [sublime.Region(0,3)], self.scope_name)
-        collection = word_highlighter.WordHighlightCollection.restore(self.view)
+        collection = core.WordHighlightCollection.restore(self.view)
         self.assertEqual(1, len(collection.words))
         word = collection.words[0]
-        self.assertIsInstance(word, word_highlighter.WordHighlight)
+        self.assertIsInstance(word, core.WordHighlight)
         self.assertEqual(self.scope_name, word.get_scope())
         self.assertEqual(self.key_name, word.get_key())
 
@@ -224,7 +226,7 @@ def clip(min_val, val, max_val):
 class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
     def setUp(self):
         super(TestWordHighlighterClearMenu, self).setUp()
-        self.wordHighlighterClearMenu = word_highlighter.wordHighlighterClearMenu(self.view)
+        self.wordHighlighterClearMenu = commands.wordHighlighterClearMenu(self.view)
 
     def test_quick_panel_is_called(self):
         self.set_buffer("")
@@ -237,9 +239,9 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
     def test_clearing_all_words(self):
         # Add some words and highlight them
         self.set_buffer("word1 word2 word3")
-        self.collection._add_word(word_highlighter.WordHighlight("word1", match_by_word=True))
-        self.collection._add_word(word_highlighter.WordHighlight("word2", match_by_word=True))
-        self.collection._add_word(word_highlighter.WordHighlight("word3", match_by_word=True))
+        self.collection._add_word(core.WordHighlight("word1", match_by_word=True))
+        self.collection._add_word(core.WordHighlight("word2", match_by_word=True))
+        self.collection._add_word(core.WordHighlight("word3", match_by_word=True))
         self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
 
         # Mocks the quick panel call and returns index of last item

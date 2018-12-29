@@ -1,28 +1,8 @@
 import sublime
-import sublime_plugin
-
-import threading
-
-import os
-dir_path = os.path.dirname(os.path.realpath(__file__))
-log_file = os.path.join(dir_path, "word_highlighter.log")
+from .helpers import bits_set, get_logfile_path
 
 import logging
-logging.basicConfig(filename=log_file, format='%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s', filemode='w', level=logging.DEBUG)
-logging.info("Starting module")
-
-# Add some base colors to use for selections (perhaps read from settings file)
-SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
-
-settings = sublime.load_settings("word_highlighter.sublime-settings")
-logging.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
-logging.info("Debounce time: {}".format(settings.get("debounce")))
-
-# Check that select bits are set
-def bits_set(value, *bits):
-    from functools import reduce
-    bit_mask = reduce(lambda x,y: x | y, bits)
-    return (value & bit_mask) == bit_mask
+logging.basicConfig(filename=get_logfile_path(__file__), format='%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s', filemode='w', level=logging.DEBUG)
 
 ## Define some color constants
 class ColorType(object):
@@ -40,6 +20,8 @@ class ColorType(object):
     def __str__(self):
         return self.color_string
 
+# Add some base colors to use for selections (perhaps read from settings file)
+SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
 UNSPECIFIED_COLOR = ColorType("UNSPECIFIED_COLOR")
 color_schemes = {s:ColorType(s) for s in ["RANDOM", "RANDOM_EVEN", "CYCLIC", "CYCLIC_EVEN", "CYCLIC_EVEN_ORDERED"]}
 
@@ -244,88 +226,6 @@ class WordHighlightCollection(object):
                 collection._add_word(WordHighlight(w[0], color=s, match_by_word=w[1]))
         return collection
 
-class CollectionableMixin(object):
-    def load_collection(self):
-        s = self.view.settings()
-        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
-
-    def save_collection(self):
-        s = self.view.settings()
-        s.set("wordhighlighter_collection", self.collection.dumps())
-
-    # Updates the collection for the object before entry and saves after exit
-    # @note non-re-entrant!
-    @classmethod
-    def update_collection_nonreentrant(cls, function):
-        def wrap(self, *args, **kwargs):
-            self.load_collection()
-            ret_value = function(self, *args, **kwargs)
-            self.save_collection()
-            return ret_value
-        return wrap
-
-class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
-    '''
-    Runs an update of the highlights
-    '''
-    def __init__(self, view):
-        self.view = view
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
-        self.debounce_time = settings.get("debounce")
-        self.debouncer = None
-
-    @CollectionableMixin.update_collection_nonreentrant
-    def update_highlighting(self):
-        logging.debug("Updating highlighting")
-        self.collection.update()
-
-    def on_modified(self):
-        if self.debouncer is not None:
-            self.debouncer.cancel()
-        self.debouncer = threading.Timer(self.debounce_time, self.update_highlighting)
-        self.debouncer.start()
-
-class wordHighlighterClearInstances(sublime_plugin.TextCommand, CollectionableMixin):
-    def __init__(self, view):
-        self.view = view
-
-    @CollectionableMixin.update_collection_nonreentrant
-    def run(self, edit):
-        self.collection.clear()
-
-def save_argument_wrapper(callback, *const_args, **const_kwargs):
-    def saved_argument_callback(*args, **kwargs):
-        args = const_args + args
-        kwargs = dict(const_kwargs, **kwargs)
-        return callback(*args, **kwargs)
-    return saved_argument_callback
-
-# Monkey-patching some good-to-have constants
-sublime.INDEX_NONE_CHOSEN = -1
-
-# Menu for clearing highlighted words
-class wordHighlighterClearMenu(sublime_plugin.TextCommand, CollectionableMixin):
-    @CollectionableMixin.update_collection_nonreentrant
-    def _clear_word(self, original_words, chosen_index):
-        self.collection._remove_word(original_words[chosen_index])
-        self.collection.update()
-
-    def clear_word(self, original_words, chosen_index):
-        if chosen_index == sublime.INDEX_NONE_CHOSEN:
-            return
-        self._clear_word(original_words, chosen_index)
-        new_index = min(chosen_index, len(original_words)-2)
-        self._run(new_index)
-
-    def _run(self, index=0):
-        self.load_collection()
-        words = [w for w in self.collection.words]
-        word_strings = [w.get_input_regex() for w in words]
-        self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
-
-    def run(self, edit, index=0):
-        self._run(index)
-
 # Expand the point to a region that contains a word, or an empty Region if
 # the point is not placed at a word.
 def expand_to_word(view, point):
@@ -358,74 +258,22 @@ def expand_to_word(view, point):
             logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(point, point) # Empty region
 
-class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, CollectionableMixin):
-    """
-    Highlights all instances of a specific word that is selected
-    """
-    def __init__(self, view):
-        self.view = view
-        self.collection = WordHighlightCollection.restore(view)
-        self.collection.update()
-        self.save_collection()
+class CollectionableMixin(object):
+    def load_collection(self):
+        s = self.view.settings()
+        self.collection = WordHighlightCollection.loads(bytes(s.get("wordhighlighter_collection")))
 
-    # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
-    # re.compile(string, re.IGNORECASE)
-    def is_case_insensitive_language(self):
-        import re
-        syntax_file = self.view.settings().get("syntax")
-        re_case_insensitive_language_files = re.compile(r'(i?)(VHDL)\.sublime-syntax')
-        matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
-        return matches_case_insensitive_language
+    def save_collection(self):
+        s = self.view.settings()
+        s.set("wordhighlighter_collection", self.collection.dumps())
 
-    def run(self, edit):
-        text_selections = []
-        for s in self.view.sel():
-            # Expand empty selections to words
-            if s.empty():
-                r = expand_to_word(self.view, s.begin())
-                # Append the word if it is not empty
-                txt = self.view.substr(r)
-                if txt != '':
-                    logging.debug("Expanded word is valid: '{}'".format(txt))
-                    text_selections.append(WordHighlight(txt, match_by_word=True, literal_match=True))
-            # Keep non-empty selections as-is
-            else:
-                text_selections.append(WordHighlight(self.view.substr(s), match_by_word=False, literal_match=True))
-        # Get unique items
-        text_selections = list(set(text_selections))
-
-        logging.debug("text_selections: " + str(text_selections))
-
-        # Find all instances of each selection
-        self.load_collection()
-        for w in text_selections:
-            self.collection.toggle_word(w)
-        self.collection.update()
-        self.save_collection()
-
-
-class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin):
-    '''
-    Edit an existing regexp via an input panel
-    '''
-    def run(self, edit):
-        self.load_collection()
-        words = self.collection.words
-        # Check if current point is placed on a region
-        sel = self.view.sel()
-        for w in words:
-            word_regions = w.find_all_regions(self.view)
-            for sr in sel:
-                if any([wr.intersects(sr) for wr in word_regions]):
-                    self.view.window().show_input_panel("Edit regexp", w.get_regex(), self.create_on_done(w), None, None)
-
-    def create_on_done(self, word):
-        def on_done(text):
-            return self.set_word_regex(word, text)
-        return on_done
-
-    @CollectionableMixin.update_collection_nonreentrant
-    def set_word_regex(self, word, text):
-        w = self.collection.get_word_highlight(word)
-        w.set_regex(text)
-        self.collection.update()
+    # Updates the collection for the object before entry and saves after exit
+    # @note non-re-entrant!
+    @classmethod
+    def update_collection_nonreentrant(cls, function):
+        def wrap(self, *args, **kwargs):
+            self.load_collection()
+            ret_value = function(self, *args, **kwargs)
+            self.save_collection()
+            return ret_value
+        return wrap
