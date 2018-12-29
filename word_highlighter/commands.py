@@ -127,6 +127,7 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin)
         for w in words:
             word_regions = w.find_all_regions(self.view)
             for sr in sel:
+                sr = sublime.Region(sr.begin()-1, sr.end()+1)
                 if any([wr.intersects(sr) for wr in word_regions]):
                     self.input_new_regex(w)
 
