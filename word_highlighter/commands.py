@@ -85,15 +85,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
         self.collection.update()
         self.save_collection()
 
-    # Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
-    # re.compile(string, re.IGNORECASE)
-    def is_case_insensitive_language(self):
-        import re
-        syntax_file = self.view.settings().get("syntax")
-        re_case_insensitive_language_files = re.compile(r'(i?)(VHDL)\.sublime-syntax')
-        matches_case_insensitive_language = re_case_insensitive_language_files.match(syntax_file) is not None
-        return matches_case_insensitive_language
-
     def run(self, edit):
         text_selections = []
         for s in self.view.sel():

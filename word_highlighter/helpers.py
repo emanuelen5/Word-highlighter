@@ -24,3 +24,12 @@ def get_logger(module_name, file_name):
     fh.setFormatter(logging.Formatter('%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s'))
     logger.addHandler(fh)
     return logger
+
+# Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
+# re.compile(string, re.IGNORECASE)
+def is_case_insensitive_language(view):
+    import re
+    syntax_file = view.settings().get("syntax")
+    re_case_insensitive_language_files = re.compile(r'(i?)(VHDL)\.sublime-syntax', re.IGNORECASE)
+    match = re_case_insensitive_language_files.match(syntax_file)
+    return match is not None
