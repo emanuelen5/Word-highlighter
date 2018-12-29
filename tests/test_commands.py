@@ -49,22 +49,27 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase):
         self.view.settings().set("wordhighlighter_collection", self.collection.dumps())
         self.view.sel().clear()
 
-    def assertIsCalled(self):
+    def assertInputNewRegexIsCalled(self):
+        with patch.object(self.wordHighlighterEditRegexp, "input_new_regex") as mock_input_method:
+            self.wordHighlighterEditRegexp._run()
+        self.assertTrue(mock_input_method.called)
+
+    def test_input_new_regex_is_called_when_selection_in_word(self):
+        self.view.sel().add(sublime.Region(1,1))
+        self.assertInputNewRegexIsCalled()
+
+    def test_input_new_regex_is_called_when_selection_borders_word(self):
+        self.view.sel().add(sublime.Region(0,0))
+        self.assertInputNewRegexIsCalled()
+
+    def test_input_new_regex_is_called_when_selection_intersects_word(self):
+        self.view.sel().add(sublime.Region(3,10))
+        self.assertInputNewRegexIsCalled()
+
+    def test_input_panel_is_called(self):
         with patch.object(self.wordHighlighterEditRegexp.view, "window") as mock_window_method:
             show_input_panel_mock = MagicMock(side_effect=(None))
             mock_window_method.return_value = MagicMock(show_input_panel=show_input_panel_mock)
-            edit_mock = MagicMock()
-            self.wordHighlighterEditRegexp.run(edit_mock)
-        self.assertEqual(1, len(show_input_panel_mock.mock_calls))
-
-    def test_input_panel_is_called_when_selection_in_word(self):
-        self.view.sel().add(sublime.Region(1,1))
-        self.assertIsCalled()
-
-    def test_input_panel_is_called_when_selection_borders_word(self):
-        self.view.sel().add(sublime.Region(0,0))
-        self.assertIsCalled()
-
-    def test_input_panel_is_called_when_selection_intersects_word(self):
-        self.view.sel().add(sublime.Region(3,10))
-        self.assertIsCalled()
+            word = self.collection.words[0]
+            self.wordHighlighterEditRegexp.input_new_regex(word)
+        self.assertTrue(show_input_panel_mock.called)

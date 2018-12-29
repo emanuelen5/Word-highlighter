@@ -126,6 +126,9 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin)
     Edit an existing regexp via an input panel
     '''
     def run(self, edit):
+        self._run()
+
+    def _run(self):
         self.load_collection()
         words = self.collection.words
         # Check if current point is placed on a region
@@ -134,7 +137,10 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, CollectionableMixin)
             word_regions = w.find_all_regions(self.view)
             for sr in sel:
                 if any([wr.intersects(sr) for wr in word_regions]):
-                    self.view.window().show_input_panel("Edit regexp", w.get_regex(), self.create_on_done(w), None, None)
+                    self.input_new_regex(w)
+
+    def input_new_regex(self, word):
+        self.view.window().show_input_panel("Edit regexp", word.get_regex(), self.create_on_done(word), None, None)
 
     def create_on_done(self, word):
         def on_done(text):
