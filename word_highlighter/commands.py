@@ -4,14 +4,14 @@ from .core import color_schemes, expand_to_word, WordHighlight, WordHighlightCol
 
 import threading
 
-from .helpers import get_logfile_path
-import logging
-logging.basicConfig(filename=get_logfile_path(__file__), format='%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s', filemode='w', level=logging.DEBUG)
-logging.info("Starting module")
+from .helpers import get_logger
+logger = get_logger(__name__, __file__)
+
+logger.info("Starting module")
 
 settings = sublime.load_settings("word_highlighter.sublime-settings")
-logging.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
-logging.info("Debounce time: {}".format(settings.get("debounce")))
+logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
+logger.info("Debounce time: {}".format(settings.get("debounce")))
 
 class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
@@ -25,7 +25,7 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
 
     @CollectionableMixin.update_collection_nonreentrant
     def update_highlighting(self):
-        logging.debug("Updating highlighting")
+        logger.debug("Updating highlighting")
         self.collection.update()
 
     def on_modified(self):
@@ -103,7 +103,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
                 # Append the word if it is not empty
                 txt = self.view.substr(r)
                 if txt != '':
-                    logging.debug("Expanded word is valid: '{}'".format(txt))
+                    logger.debug("Expanded word is valid: '{}'".format(txt))
                     text_selections.append(WordHighlight(txt, match_by_word=True, literal_match=True))
             # Keep non-empty selections as-is
             else:
@@ -111,7 +111,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, C
         # Get unique items
         text_selections = list(set(text_selections))
 
-        logging.debug("text_selections: " + str(text_selections))
+        logger.debug("text_selections: " + str(text_selections))
 
         # Find all instances of each selection
         self.load_collection()

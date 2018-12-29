@@ -1,8 +1,7 @@
 import sublime
-from .helpers import bits_set, get_logfile_path
+from .helpers import bits_set, get_logger
 
-import logging
-logging.basicConfig(filename=get_logfile_path(__file__), format='%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s', filemode='w', level=logging.DEBUG)
+logger = get_logger(__name__, __file__)
 
 ## Define some color constants
 class ColorType(object):
@@ -31,7 +30,7 @@ def get_color_picking_scheme(name):
         color_picking_scheme = color_schemes[name]
     else:
         color_picking_scheme = color_schemes["RANDOM"]
-        logging.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
+        logger.error("Invalid next color scheme setting {}. Choose between {}".format(name, list(color_schemes.keys())))
     return color_picking_scheme
 
 # Instances that combine a word with a color scope
@@ -163,7 +162,7 @@ class WordHighlightCollection(object):
             self.next_color_index()
         else:
             error_msg = "No defined color picking for scheme '{}'".format(color_picking_scheme)
-            logging.error(error_msg)
+            logger.error(error_msg)
             raise AssertionError(error_msg)
         return next_color
 
@@ -173,14 +172,14 @@ class WordHighlightCollection(object):
             self._remove_word(word)
         else:
             self._add_word(word)
-        logging.debug("Used words: {}".format([str(w) for w in self.words]))
+        logger.debug("Used words: {}".format([str(w) for w in self.words]))
 
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
         if word.color is UNSPECIFIED_COLOR:
             settings = sublime.load_settings("word_highlighter.sublime-settings")
             color_picking_scheme = get_color_picking_scheme(settings.get("color_picking_scheme"))
-            logging.debug("Chosen color scheme: {}".format(color_picking_scheme))
+            logger.debug("Chosen color scheme: {}".format(color_picking_scheme))
             word.set_color(self.get_next_word_color(color_picking_scheme))
         self.words.append(word)
 
@@ -192,7 +191,7 @@ class WordHighlightCollection(object):
             self.removed_words.append(w)
 
     def clear(self):
-        logging.debug("Clearing all highlighted words")
+        logger.debug("Clearing all highlighted words")
         self.words.clear()
         self.removed_words.clear()
         for k in SCOPE_COLORS:
@@ -222,7 +221,7 @@ class WordHighlightCollection(object):
                     matches_whole_word = (word == whole_word)
                     unique_words |= set(((word, matches_whole_word), ))
             for w in unique_words:
-                logging.info("Restoring word: '{}'".format(w[0]))
+                logger.info("Restoring word: '{}'".format(w[0]))
                 collection._add_word(WordHighlight(w[0], color=s, match_by_word=w[1]))
         return collection
 
@@ -232,13 +231,13 @@ def expand_to_word(view, point):
     classification = view.classify(point)
     # If start of word, expand right to end of word
     if bits_set(classification, sublime.CLASS_WORD_START):
-        logging.debug("At start of word!")
+        logger.debug("At start of word!")
         back_stop = point
         forward_stop = view.find_by_class(point, forward=True, classes=sublime.CLASS_WORD_END)
         return sublime.Region(back_stop, forward_stop)
     # If end of word, expand left to start of word
     elif bits_set(classification, sublime.CLASS_WORD_END):
-        logging.debug("At end of word!")
+        logger.debug("At end of word!")
         back_stop = view.find_by_class(point, forward=False, classes=sublime.CLASS_WORD_START)
         forward_stop = point
         return sublime.Region(back_stop, forward_stop)
@@ -255,7 +254,7 @@ def expand_to_word(view, point):
             # Valid word!
             return r
         else:
-            logging.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
+            logger.debug("Expanded word is invalid: '{}'".format(view.substr(r)))
             return sublime.Region(point, point) # Empty region
 
 class CollectionableMixin(object):
