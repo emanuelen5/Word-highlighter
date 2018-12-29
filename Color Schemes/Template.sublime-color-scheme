@@ -1,5 +1,5 @@
 {
-    "name": "Monokai",
+    "name": "{{scheme-name}}",
     "author": "Erasmus Cedernaes",
     "variables":
     {
