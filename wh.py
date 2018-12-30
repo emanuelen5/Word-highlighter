@@ -9,6 +9,7 @@ from word_highlighter.commands import wordHighlighterClearInstances
 from word_highlighter.commands import wordHighlighterClearMenu
 from word_highlighter.commands import wordHighlighterHighlightInstancesOfSelection
 from word_highlighter.commands import wordHighlighterEditRegexp
+from word_highlighter.commands import wordHighlighterCreateRegexp
 
 def plugin_loaded():
     word_highlighter.commands.plugin_loaded()
@@ -23,4 +24,5 @@ __all__ = [
     "wordHighlighterClearMenu",
     "wordHighlighterHighlightInstancesOfSelection",
     "wordHighlighterEditRegexp",
+    "wordHighlighterCreateRegexp",
 ]

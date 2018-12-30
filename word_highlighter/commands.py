@@ -140,6 +140,10 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
     '''
     Edit an existing regexp via an input panel
     '''
+    def __init__(self, view):
+        self.view = view
+        self.input_panel_prompt = "Edit regexp"
+
     def run(self, edit):
         self._run()
 
@@ -156,7 +160,7 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
                     self.input_new_regex(w)
 
     def input_new_regex(self, word):
-        self.view.window().show_input_panel("Edit regexp", word.get_regex(), self.create_on_done(word), self.create_on_modified(word), self.create_on_canceled(word))
+        self.view.window().show_input_panel(self.input_panel_prompt, word.get_regex(), self.create_on_done(word), self.create_on_modified(word), self.create_on_canceled(word))
 
     def create_on_done(self, word):
         def on_done(text):
@@ -184,5 +188,24 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
 
     def set_word_regex(self, word, text):
         word.set_regex(text)
+        self.collection.update()
+        self.collection.save()
+
+class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
+    '''
+    Create a regexp via an input panel
+    '''
+    def __init__(self, view):
+        self.view = view
+        self.input_panel_prompt = "Create regexp"
+
+    def _run(self):
+        self.load_collection()
+        word = core.WordHighlight("")
+        self.collection._add_word(word)
+        self.input_new_regex(word)
+
+    def create_on_canceled(self, word):
+        self.collection._remove_word(word)
         self.collection.update()
         self.collection.save()
