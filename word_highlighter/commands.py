@@ -156,12 +156,18 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
                     self.input_new_regex(w)
 
     def input_new_regex(self, word):
-        self.view.window().show_input_panel("Edit regexp", word.get_regex(), self.create_on_done(word), None, None)
+        self.view.window().show_input_panel("Edit regexp", word.get_regex(), self.create_on_done(word), self.create_on_modified(word), None)
 
     def create_on_done(self, word):
         def on_done(text):
-            return self.set_word_regex(word, text)
+            self.set_word_regex(word, text)
         return on_done
+
+    def create_on_modified(self, word):
+        def on_modified(text):
+            self.set_word_regex(word, text)
+            word.set_regex(text)
+        return on_modified
 
     @core.CollectionableMixin.update_collection_nonreentrant
     def set_word_regex(self, word, text):
