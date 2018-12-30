@@ -1,3 +1,4 @@
+import sublime
 import logging
 
 import os
@@ -15,6 +16,9 @@ def get_logfile_path(filename):
     log_file = os.path.join(logs_dir, basename + ".log")
     os.makedirs(logs_dir, exist_ok=True)
     return log_file
+
+def get_settings():
+    return sublime.load_settings("word_highlighter.sublime-settings")
 
 def get_logger(module_name, file_name):
     logger = logging.getLogger(module_name)

@@ -9,7 +9,7 @@ logger = helpers.get_logger(__name__, __file__)
 
 def init():
     logger.info("Loading module")
-    settings = sublime.load_settings("word_highlighter.sublime-settings")
+    settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
 
@@ -19,7 +19,7 @@ class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
     def __init__(self, view):
         self.view = view
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        settings = helpers.get_settings()
         self.debounce_time = settings.get("debounce")
         self.debouncer = None
 

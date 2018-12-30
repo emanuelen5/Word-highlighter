@@ -2,6 +2,7 @@ import sublime
 from unittest.mock import MagicMock, patch
 import word_highlighter.commands as commands
 import word_highlighter.core as core
+import word_highlighter.helpers as helpers
 from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 def clip(min_val, val, max_val):
@@ -17,7 +18,7 @@ def get_scope_color(index):
 class TestHighlighting(SublimeText_TestCase):
     def setUp(self):
         super(TestHighlighting, self).setUp()
-        settings = sublime.load_settings("word_highlighter.sublime-settings")
+        settings = helpers.get_settings()
         settings.set("color_picking_scheme", "CYCLIC_EVEN_ORDERED")
 
     def get_highlighted_regions(self):
