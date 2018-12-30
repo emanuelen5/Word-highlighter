@@ -93,9 +93,9 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.view.sel().clear()
 
     def assertInputNewRegexIsCalled(self):
-        with patch.object(self.wordHighlighterEditRegexp, "input_new_regex") as mock_input_method:
+        with patch.object(self.wordHighlighterEditRegexp, "edit_regex") as mock_input:
             self.wordHighlighterEditRegexp._run()
-        self.assertTrue(mock_input_method.called)
+        self.assertTrue(mock_input.called)
 
     def test_input_new_regex_is_called_when_selection_in_word(self):
         self.view.sel().add(sublime.Region(1,1))
@@ -138,7 +138,7 @@ class TestWordHighlighterCreateRegexp(WordHighlighter_TestCase, core.Collectiona
         self.wordHighlighterCreateRegexp.load_collection()
 
     def test_word_is_added(self):
-        with patch.object(self.wordHighlighterCreateRegexp, "input_new_regex") as mock_input:
+        with patch.object(self.wordHighlighterCreateRegexp, "edit_regex") as mock_input:
             old_length = len(self.wordHighlighterCreateRegexp.collection.words)
             self.wordHighlighterCreateRegexp._run()
             self.assertTrue(mock_input.called)

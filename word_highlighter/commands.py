@@ -159,9 +159,9 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
             for sr in sel:
                 sr = sublime.Region(sr.begin()-1, sr.end()+1)
                 if any([wr.intersects(sr) for wr in word_regions]):
-                    self.input_new_regex(w)
+                    self.edit_regex(w)
 
-    def input_new_regex(self, word):
+    def edit_regex(self, word):
         self.view.window().show_input_panel(self.input_panel_prompt, word.get_regex(), self.create_on_done(word), self.create_on_modified(word), self.create_on_canceled(word))
 
     def create_on_done(self, word):
@@ -205,7 +205,7 @@ class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
         self.load_collection()
         word = core.WordHighlight("")
         self.collection._add_word(word)
-        self.input_new_regex(word)
+        self.edit_regex(word)
 
     def create_on_canceled(self, word):
         def on_canceled():
