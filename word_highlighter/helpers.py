@@ -34,11 +34,14 @@ def get_logger(module_name, file_name):
     logger.addHandler(fh)
     return logger
 
-# Check if the current language is case insensitive (actually just check if its VHDL, since that is the only one I know and care about currently)
-# re.compile(string, re.IGNORECASE)
-def is_case_insensitive_language(view):
+# Check if the current language is case sensitive (actually just check if it's not VHDL, since that is the only one I know and care about currently)
+def is_case_sensitive_language(view):
     import re
     syntax_file = view.settings().get("syntax")
-    re_case_insensitive_language_files = re.compile(r'(i?)(VHDL)\.sublime-syntax', re.IGNORECASE)
-    match = re_case_insensitive_language_files.match(syntax_file)
-    return match is not None
+    case_insensitive_languages = ("VHDL", )
+    for lang in case_insensitive_languages:
+        re_lang_file = "^" + lang + r'\.sublime-syntax'
+        match = re.compile(re_lang_file, re.IGNORECASE).match(syntax_file)
+        if match:
+            return False
+    return True

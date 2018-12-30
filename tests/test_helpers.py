@@ -7,7 +7,7 @@ class TestIsCaseSensitiveLanguage(unittest.TestCase):
     def assertLanguageCaseSensitivity(self, case_sensitivity, language):
         view_mock = MagicMock()
         view_mock.settings.return_value.get.return_value = language.lower() + ".sublime-syntax"
-        self.assertEqual(not case_sensitivity, helpers.is_case_insensitive_language(view_mock))
+        self.assertEqual(case_sensitivity, helpers.is_case_sensitive_language(view_mock))
 
     def test_some_languages(self):
         self.assertLanguageCaseSensitivity(False, "VHDL")
