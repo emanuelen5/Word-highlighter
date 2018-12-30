@@ -4,14 +4,14 @@ from .core import color_schemes, expand_to_word, WordHighlight, WordHighlightCol
 
 import threading
 
-from .helpers import get_logger
-logger = get_logger(__name__, __file__)
+import word_highlighter.helpers as helpers
+logger = helpers.get_logger(__name__, __file__)
 
-logger.info("Starting module")
-
-settings = sublime.load_settings("word_highlighter.sublime-settings")
-logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
-logger.info("Debounce time: {}".format(settings.get("debounce")))
+def init():
+    logger.info("Loading module")
+    settings = sublime.load_settings("word_highlighter.sublime-settings")
+    logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
+    logger.info("Debounce time: {}".format(settings.get("debounce")))
 
 class update_words_event(sublime_plugin.ViewEventListener, CollectionableMixin):
     '''
