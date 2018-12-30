@@ -5,6 +5,9 @@ import os
 __dir__ = os.path.dirname(os.path.realpath(__file__))
 logs_dir = os.path.join(__dir__, '..', 'logs')
 
+def plugin_loaded():
+    pass
+
 # Check that select bits are set
 def bits_set(value, *bits):
     from functools import reduce

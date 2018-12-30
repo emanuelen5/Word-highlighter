@@ -3,6 +3,9 @@ import word_highlighter.helpers as helpers
 
 logger = helpers.get_logger(__name__, __file__)
 
+def plugin_loaded():
+    pass
+
 ## Define some color constants
 class ColorType(object):
     def __init__(self, color_string):

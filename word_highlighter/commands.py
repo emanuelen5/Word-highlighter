@@ -7,7 +7,7 @@ import threading
 import word_highlighter.helpers as helpers
 logger = helpers.get_logger(__name__, __file__)
 
-def init():
+def plugin_loaded():
     logger.info("Loading module")
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
