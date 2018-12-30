@@ -88,6 +88,8 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.set_buffer("word1 word2 word3")
         self.collection._add_word(core.WordHighlight("word1"))
         self.save_collection()
+        self.wordHighlighterEditRegexp.load_collection()
+        self.word = self.wordHighlighterEditRegexp.collection.words[0]
         self.view.sel().clear()
 
     def assertInputNewRegexIsCalled(self):
@@ -107,12 +109,15 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.view.sel().add(sublime.Region(3,10))
         self.assertInputNewRegexIsCalled()
 
-    def test_regex_is_set(self):
-        word = self.collection.words[0]
-        on_done = self.wordHighlighterEditRegexp.create_on_done(word)
+    def test_regex_is_set_on_modified(self):
+        on_modified = self.wordHighlighterEditRegexp.create_on_modified(self.word)
         new_regex = "word2"
-        on_done(new_regex)
-        # We need to reload the collection, as updated by the "on_done" handler
-        self.load_collection()
-        new_word = self.collection.words[0]
-        self.assertEqual(new_regex, new_word.get_regex())
+        on_modified(new_regex)
+        self.assertEqual(new_regex, self.word.get_regex())
+
+    def test_regex_is_reset_on_canceled(self):
+        old_regex = self.word.get_regex()
+        on_canceled = self.wordHighlighterEditRegexp.create_on_canceled(self.word)
+        self.word.set_regex(old_regex + "_modified")
+        on_canceled()
+        self.assertEqual(old_regex, self.word.get_regex())
