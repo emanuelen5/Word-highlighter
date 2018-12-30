@@ -19,6 +19,15 @@ def get_logfile_path(filename):
 def get_logger(module_name, file_name):
     logger = logging.getLogger(module_name)
     logger.setLevel(logging.DEBUG)
+
+    # Make sure to remove old handlers before adding new one (necessary when reloading package)
+    handlers = list(logger.handlers)
+    for h in handlers:
+        logger.removeHandler(h)
+        h.flush()
+        h.close()
+
+    # Add new handler
     fh = logging.FileHandler(get_logfile_path(file_name), mode='w')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)-23s: %(name)-15s: %(levelname)-10s: %(message)s'))
