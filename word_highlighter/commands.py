@@ -2,9 +2,11 @@ import sublime
 import sublime_plugin
 import word_highlighter.core as core
 
+# For automatically creating color schemes for the highlighter
 import shutil
 import os
 
+# For updating the highlighting on modifications of text
 import threading
 
 import word_highlighter.helpers as helpers
