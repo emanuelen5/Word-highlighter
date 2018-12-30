@@ -127,3 +127,28 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.word.set_regex(old_regex + "_modified")
         on_canceled()
         self.assertEqual(old_regex, self.word.get_regex())
+
+class TestWordHighlighterCreateRegexp(WordHighlighter_TestCase, core.CollectionableMixin):
+    def setUp(self):
+        super(TestWordHighlighterCreateRegexp, self).setUp()
+        self.wordHighlighterCreateRegexp = commands.wordHighlighterCreateRegexp(self.view)
+        # Set collection to point out word
+        self.set_buffer("word1 word2 word3")
+        self.save_collection()
+        self.wordHighlighterCreateRegexp.load_collection()
+
+    def test_word_is_added(self):
+        with patch.object(self.wordHighlighterCreateRegexp, "input_new_regex") as mock_input:
+            old_length = len(self.wordHighlighterCreateRegexp.collection.words)
+            self.wordHighlighterCreateRegexp._run()
+            self.assertTrue(mock_input.called)
+            self.assertEqual(old_length+1, len(self.wordHighlighterCreateRegexp.collection.words))
+
+    def test_regex_is_removed_on_canceled(self):
+        collection = self.wordHighlighterCreateRegexp.collection
+        word = core.WordHighlight("word1")
+        collection._add_word(word)
+        old_length = len(self.wordHighlighterCreateRegexp.collection.words)
+        on_canceled = self.wordHighlighterCreateRegexp.create_on_canceled(word)
+        on_canceled()
+        self.assertEqual(old_length-1, len(self.wordHighlighterCreateRegexp.collection.words))
