@@ -53,6 +53,8 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
 
     def create_color_scheme(self):
         current_color_scheme = self.get_color_scheme()
+        if current_color_scheme is None:
+            return
         if current_color_scheme != self.last_color_scheme:
             logger.info("Adding color scheme {}".format(current_color_scheme))
             color_scheme_basename = os.path.basename(current_color_scheme)
