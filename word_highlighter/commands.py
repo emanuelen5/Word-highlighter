@@ -206,6 +206,9 @@ class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
         self.input_new_regex(word)
 
     def create_on_canceled(self, word):
-        self.collection._remove_word(word)
-        self.collection.update()
-        self.collection.save()
+        def on_canceled():
+            logger.debug("Cancelling create regexp")
+            self.collection._remove_word(word)
+            self.collection.update()
+            self.collection.save()
+        return on_canceled
