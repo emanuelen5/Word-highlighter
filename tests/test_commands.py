@@ -49,7 +49,7 @@ class TestHighlighting(SublimeText_TestCase):
                 self.error_list.append("'{}' - Error: '{}'".format(c,e))
         self.assertEqual([], self.error_list, "Non-highlightable characters: Errors for {}/{}".format(len(self.error_list), len(chars)))
 
-class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
+class TestWordHighlighterClearMenu(WordHighlighter_TestCase, core.CollectionableMixin):
     def setUp(self):
         super(TestWordHighlighterClearMenu, self).setUp()
         self.wordHighlighterClearMenu = commands.wordHighlighterClearMenu(self.view)
@@ -67,7 +67,7 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
         self.collection._add_word(core.WordHighlight("word1", match_by_word=True))
         self.collection._add_word(core.WordHighlight("word2", match_by_word=True))
         self.collection._add_word(core.WordHighlight("word3", match_by_word=True))
-        self.collection.save()
+        self.save_collection()
 
         # Mocks the quick panel call and returns index of last item
         def show_quick_panel_mock_call__select_last_item(items, callback, *args, selected_index=0, **kwargs):
@@ -79,14 +79,14 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase):
             self.wordHighlighterClearMenu._run()
         self.assertEqual(4, len(mock_window_method.return_value.show_quick_panel.mock_calls))
 
-class TestWordHighlighterEditRegexp(WordHighlighter_TestCase):
+class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.CollectionableMixin):
     def setUp(self):
         super(TestWordHighlighterEditRegexp, self).setUp()
         self.wordHighlighterEditRegexp = commands.wordHighlighterEditRegexp(self.view)
         # Set collection to point out word
         self.set_buffer("word1 word2 word3")
         self.collection._add_word(core.WordHighlight("word1"))
-        self.collection.save()
+        self.save_collection()
         self.view.sel().clear()
 
     def assertInputNewRegexIsCalled(self):
@@ -112,6 +112,6 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase):
         new_regex = "word2"
         on_done(new_regex)
         # We need to reload the collection, as updated by the "on_done" handler
-        self.collection = core.WordHighlightCollection.load(self.view)
+        self.load_collection()
         new_word = self.collection.words[0]
         self.assertEqual(new_regex, new_word.get_regex())
