@@ -171,6 +171,6 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
 
     @core.CollectionableMixin.update_collection_nonreentrant
     def set_word_regex(self, word, text):
-        w = self.collection.get_word_highlight(word)
-        w.set_regex(text)
+        word.set_regex(text)
         self.collection.update()
+        self.collection.save()
