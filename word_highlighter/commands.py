@@ -156,8 +156,20 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
                     self.input_new_regex(w)
 
     def input_new_regex(self, word):
-        on_modified = self.create_on_modified(word)
-        self.view.window().show_input_panel("Edit regexp", word.get_regex(), on_modified, on_modified, self.create_on_canceled(word))
+        self.view.window().show_input_panel("Edit regexp", word.get_regex(), self.create_on_done(word), self.create_on_modified(word), self.create_on_canceled(word))
+
+    def create_on_done(self, word):
+        def on_done(text):
+            self.set_word_regex(word, text)
+            regions = word.find_all_regions(self.view)
+            highlighted_characters = sum([r.end() - r.begin() for r in regions])
+
+            if highlighted_characters == 0:
+                logger.debug("Removing non-matching regex: {}".format(word.get_regex()))
+                self.collection._remove_word(word)
+                self.collection.update()
+                self.collection.save()
+        return on_done
 
     def create_on_modified(self, word):
         def on_modified(text):

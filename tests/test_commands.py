@@ -109,6 +109,12 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.view.sel().add(sublime.Region(3,10))
         self.assertInputNewRegexIsCalled()
 
+    def test_regex_is_set_on_done_empty(self):
+        on_done = self.wordHighlighterEditRegexp.create_on_done(self.word)
+        new_regex = "\b"
+        on_done(new_regex)
+        self.assertEqual(0, len(self.wordHighlighterEditRegexp.collection.words))
+
     def test_regex_is_set_on_modified(self):
         on_modified = self.wordHighlighterEditRegexp.create_on_modified(self.word)
         new_regex = "word2"
