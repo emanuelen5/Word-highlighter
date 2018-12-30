@@ -10,7 +10,7 @@ import os
 import threading
 
 import word_highlighter.helpers as helpers
-logger = helpers.get_logger(__name__, __file__)
+logger = helpers.get_logger()
 
 def plugin_loaded():
     logger.info("Loading module")

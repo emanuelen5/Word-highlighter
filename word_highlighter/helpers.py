@@ -1,5 +1,6 @@
 import sublime
 import logging
+import inspect
 
 import os
 __dir__ = os.path.dirname(os.path.realpath(__file__))
@@ -25,7 +26,17 @@ def get_logfile_path(filename):
 def get_settings():
     return sublime.load_settings("word_highlighter.sublime-settings")
 
-def get_logger(module_name, file_name):
+def get_logger(module_name=None, file_name=None):
+
+    if module_name is None or file_name is None:
+        caller_frame = inspect.stack()[1]
+        caller_module = inspect.getmodule(caller_frame[0])
+
+    if module_name is None:
+        module_name = caller_module.__name__
+    if file_name is None:
+        file_name = caller_module.__file__
+
     logger = logging.getLogger(module_name)
     logger.setLevel(logging.DEBUG)
 
