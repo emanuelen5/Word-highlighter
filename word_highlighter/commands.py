@@ -2,6 +2,9 @@ import sublime
 import sublime_plugin
 import word_highlighter.core as core
 
+import shutil
+import os
+
 import threading
 
 import word_highlighter.helpers as helpers
@@ -33,6 +36,26 @@ class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMi
             self.debouncer.cancel()
         self.debouncer = threading.Timer(self.debounce_time, self.update_highlighting)
         self.debouncer.start()
+
+class update_color_scheme_event(sublime_plugin.ViewEventListener):
+    def __init__(self, view):
+        self.view = view
+        self.last_color_scheme = None
+        self.create_color_scheme() # Run once initially, then only on change of settings
+        key = "create_color_scheme_on_change"
+        self.view.settings().clear_on_change(key)
+        self.view.settings().add_on_change(key, self.create_color_scheme)
+
+    def get_color_scheme(self):
+        return self.view.settings().get("color_scheme")
+
+    def create_color_scheme(self):
+        current_color_scheme = self.get_color_scheme()
+        if current_color_scheme != self.last_color_scheme:
+            logger.info("Adding color scheme {}".format(current_color_scheme))
+            color_scheme_basename = os.path.basename(current_color_scheme)
+            shutil.copy(os.path.join(helpers.color_schemes_dir, "word_highlighter.template-sublime-color-scheme"), os.path.join(helpers.color_schemes_dir, color_scheme_basename))
+            self.last_color_scheme = current_color_scheme
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
     def __init__(self, view):
@@ -110,7 +133,6 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, c
             self.collection.toggle_word(w)
         self.collection.update()
         self.save_collection()
-
 
 class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableMixin):
     '''

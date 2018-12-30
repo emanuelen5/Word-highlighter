@@ -3,7 +3,9 @@ import logging
 
 import os
 __dir__ = os.path.dirname(os.path.realpath(__file__))
-logs_dir = os.path.join(__dir__, '..', 'logs')
+base_dir = os.path.realpath(os.path.join(__dir__, '..'))
+logs_dir = os.path.join(base_dir, 'logs')
+color_schemes_dir = os.path.join(base_dir, "Color Schemes")
 
 def plugin_loaded():
     pass
