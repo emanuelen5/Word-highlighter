@@ -14,6 +14,7 @@ def plugin_loaded():
     word_highlighter.core.plugin_loaded()
     word_highlighter.helpers.plugin_loaded()
 
+# sublime_plugin classes must be exposed here (or at least on this level) to be registered in Sublime Text
 __all__ = [
     "update_words_event",
     "wordHighlighterClearInstances",
