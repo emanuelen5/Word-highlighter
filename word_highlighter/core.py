@@ -1,7 +1,10 @@
 import sublime
-from .helpers import bits_set, get_logger
+import word_highlighter.helpers as helpers
 
-logger = get_logger(__name__, __file__)
+logger = helpers.get_logger(__name__, __file__)
+
+def plugin_loaded():
+    pass
 
 ## Define some color constants
 class ColorType(object):
@@ -177,7 +180,7 @@ class WordHighlightCollection(object):
     def _add_word(self, word):
         assert isinstance(word, WordHighlight)
         if word.color is UNSPECIFIED_COLOR:
-            settings = sublime.load_settings("word_highlighter.sublime-settings")
+            settings = helpers.get_settings()
             color_picking_scheme = get_color_picking_scheme(settings.get("color_picking_scheme"))
             logger.debug("Chosen color scheme: {}".format(color_picking_scheme))
             word.set_color(self.get_next_word_color(color_picking_scheme))
@@ -232,13 +235,13 @@ class WordHighlightCollection(object):
 def expand_to_word(view, point):
     classification = view.classify(point)
     # If start of word, expand right to end of word
-    if bits_set(classification, sublime.CLASS_WORD_START):
+    if helpers.bits_set(classification, sublime.CLASS_WORD_START):
         logger.debug("At start of word!")
         back_stop = point
         forward_stop = view.find_by_class(point, forward=True, classes=sublime.CLASS_WORD_END)
         return sublime.Region(back_stop, forward_stop)
     # If end of word, expand left to start of word
-    elif bits_set(classification, sublime.CLASS_WORD_END):
+    elif helpers.bits_set(classification, sublime.CLASS_WORD_END):
         logger.debug("At end of word!")
         back_stop = view.find_by_class(point, forward=False, classes=sublime.CLASS_WORD_START)
         forward_stop = point
@@ -252,7 +255,7 @@ def expand_to_word(view, point):
         forward_stop = view.find_by_class(point, forward=True, classes=stop_classes)
         r = sublime.Region(back_stop, forward_stop)
         # Check that the found Region contains a word
-        if bits_set(view.classify(back_stop), sublime.CLASS_WORD_START) and bits_set(view.classify(forward_stop), sublime.CLASS_WORD_END):
+        if helpers.bits_set(view.classify(back_stop), sublime.CLASS_WORD_START) and helpers.bits_set(view.classify(forward_stop), sublime.CLASS_WORD_END):
             # Valid word!
             return r
         else:
