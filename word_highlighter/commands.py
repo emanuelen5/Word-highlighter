@@ -214,3 +214,18 @@ class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
             self.collection.update()
             self.collection.save()
         return on_canceled
+
+class wordHighlighterEditRegexpMenu(wordHighlighterEditRegexp):
+    '''
+    Edit regexp from a list of inputs
+    '''
+    def _run(self, index=0):
+        self.load_collection()
+        words = self.collection.words
+        word_strings = [w.get_input_regex() for w in words]
+        self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.edit_chosen_word, words), sublime.MONOSPACE_FONT, selected_index=index)
+
+    def edit_chosen_word(self, original_words, chosen_index):
+        if chosen_index == sublime.INDEX_NONE_CHOSEN:
+            return
+        self.edit_regex(original_words[chosen_index])

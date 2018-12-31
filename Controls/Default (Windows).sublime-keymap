@@ -1,7 +1,8 @@
 [
-	{"keys": ["alt+k", "h", "w"],      "command": "word_highlighter_highlight_instances_of_selection"},
-    {"keys": ["alt+k", "h", "c"],      "command": "word_highlighter_clear_instances"},
-    {"keys": ["alt+k", "h", "e"],      "command": "word_highlighter_edit_regexp"},
-    {"keys": ["alt+k", "h", "n", "r"], "command": "word_highlighter_create_regexp"},
-	{"keys": ["alt+k", "h", "m", "c"], "command": "word_highlighter_clear_menu"},
+	{"keys": ["alt+k", "h", "w"],           "command": "word_highlighter_highlight_instances_of_selection"},
+    {"keys": ["alt+k", "h", "c"],           "command": "word_highlighter_clear_instances"},
+    {"keys": ["alt+k", "h", "e"],           "command": "word_highlighter_edit_regexp"},
+    {"keys": ["alt+k", "h", "n", "r"],      "command": "word_highlighter_create_regexp"},
+    {"keys": ["alt+k", "h", "m", "c"],      "command": "word_highlighter_clear_menu"},
+	{"keys": ["alt+k", "h", "m", "e", "r"], "command": "word_highlighter_edit_regexp_menu"},
 ]

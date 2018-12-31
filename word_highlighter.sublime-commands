@@ -12,6 +12,10 @@
         "command": "word_highlighter_clear_menu"
     },
     {
+        "caption": "Word Highlighter: Edit regexp menu",
+        "command": "word_highlighter_edit_regexp_menu"
+    },
+    {
         "caption": "Word Highlighter: Create new with regexp",
         "command": "word_highlighter_create_regexp"
     },
