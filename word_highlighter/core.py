@@ -44,18 +44,13 @@ class WordHighlight(object):
             color = ColorType(color)
         elif not isinstance(color, ColorType):
             raise ValueError("Invalid color type")
-        self.input_regex = regex
         self.regex = WordHighlight.convert_regex(regex, literal_match=literal_match, match_by_word=match_by_word)
         self.color = color
 
     def get_regex(self):
         return self.regex
 
-    def get_input_regex(self):
-        return self.input_regex
-
     def set_regex(self, regex):
-        self.input_regex = regex
         self.regex = regex
 
     @staticmethod

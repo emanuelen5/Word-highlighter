@@ -96,7 +96,7 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, core.CollectionableMi
     def _run(self, index=0):
         self.load_collection()
         words = [w for w in self.collection.words]
-        word_strings = [w.get_input_regex() for w in words]
+        word_strings = [w.get_regex() for w in words]
         self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.clear_word, words), sublime.MONOSPACE_FONT, selected_index=index)
 
     def run(self, edit, index=0):
@@ -222,7 +222,7 @@ class wordHighlighterEditRegexpMenu(wordHighlighterEditRegexp):
     def _run(self, index=0):
         self.load_collection()
         words = self.collection.words
-        word_strings = [w.get_input_regex() for w in words]
+        word_strings = [w.get_regex() for w in words]
         self.view.window().show_quick_panel(word_strings, save_argument_wrapper(self.edit_chosen_word, words), sublime.MONOSPACE_FONT, selected_index=index)
 
     def edit_chosen_word(self, original_words, chosen_index):
