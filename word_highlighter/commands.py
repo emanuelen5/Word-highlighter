@@ -42,7 +42,6 @@ class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMi
 class update_color_scheme_event(sublime_plugin.ViewEventListener):
     def __init__(self, view):
         self.view = view
-        self.last_color_scheme = None
         self.create_color_scheme() # Run once initially, then only on change of settings
         key = "create_color_scheme_on_change"
         self.view.settings().clear_on_change(key)
@@ -55,11 +54,15 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return
-        if current_color_scheme != self.last_color_scheme:
-            logger.info("Adding color scheme {}".format(current_color_scheme))
-            color_scheme_basename = os.path.basename(current_color_scheme)
-            shutil.copy(os.path.join(helpers.color_schemes_dir, "word_highlighter.template-sublime-color-scheme"), os.path.join(helpers.color_schemes_dir, color_scheme_basename))
-            self.last_color_scheme = current_color_scheme
+        template_path = os.path.join(helpers.color_schemes_dir, "word_highlighter.template-sublime-color-scheme")
+        scheme_copy_path = os.path.join(helpers.color_schemes_dir, os.path.basename(current_color_scheme))
+
+        if os.path.isfile(scheme_copy_path) and os.path.getmtime(template_path) <= os.path.getmtime(scheme_copy_path):
+            logger.debug("There already exists a newer scheme than the template")
+            return
+
+        logger.info("Adding color scheme {}".format(current_color_scheme))
+        shutil.copy(template_path, scheme_copy_path)
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
     def __init__(self, view):
