@@ -18,20 +18,23 @@ def plugin_loaded():
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
 
+def send_api_command(command_name, setting_field, settings_name=None):
+    if settings_name is None:
+        settings_name = "word_highlighter_temp_settings.sublime-settings"
+    settings = sublime.load_settings(settings_name)
+    settings.erase(setting_field)
+    sublime.run_command(command_name, {'settings': settings_name})
+    has_set_value = settings.has(setting_field)
+    value = settings.get(setting_field)
+    value, has_set_value
+
 def color_picker_is_installed():
-    settings = sublime.load_settings('color_picker_shared_settings.sublime-settings')
-    settings.set('color_pick_return', None)
-    sublime.run_command('color_pick_api_is_available', {'settings': 'color_picker_shared_settings.sublime-settings'})
-    color_picker_return_value = settings.get('color_pick_return')
-    if color_picker_return_value is None:
-        return False
-    return color_picker_return_value
+    color_value, has_set_value = send_api_command("color_pick_api_is_available", "color_pick_return")
+    return has_set_value and color_value == True
 
 def open_color_picker_menu():
-    settings = sublime.load_settings('color_picker_shared_settings.sublime-settings')
-    settings.set('color_pick_return', None)
-    sublime.run_command('color_pick_api_get_color', {'settings': 'color_picker_shared_settings.sublime-settings', 'default_color': '#ff0000'})
-    return settings.get('color_pick_return')
+    color_value, has_set_value = send_api_command("color_pick_api_get_color", "color_pick_return")
+    return color_value
 
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
