@@ -18,6 +18,21 @@ def plugin_loaded():
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
 
+def color_picker_is_installed():
+    settings = sublime.load_settings('color_picker_shared_settings.sublime-settings')
+    settings.set('color_pick_return', None)
+    sublime.run_command('color_pick_api_is_available', {'settings': 'color_picker_shared_settings.sublime-settings'})
+    color_picker_return_value = settings.get('color_pick_return')
+    if color_picker_return_value is None:
+        return False
+    return color_picker_return_value
+
+def open_color_picker_menu():
+    settings = sublime.load_settings('color_picker_shared_settings.sublime-settings')
+    settings.set('color_pick_return', None)
+    sublime.run_command('color_pick_api_get_color', {'settings': 'color_picker_shared_settings.sublime-settings', 'default_color': '#ff0000'})
+    return settings.get('color_pick_return')
+
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
     Runs an update of the highlights
