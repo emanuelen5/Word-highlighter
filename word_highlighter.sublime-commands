@@ -23,4 +23,8 @@
         "caption": "Word Highlighter: Edit regexp for highlight at cursor",
         "command": "word_highlighter_edit_regexp"
     },
+    {
+        "caption": "Word Highlighter: Color picker",
+        "command": "word_highlighter_color_picker"
+    },
 ]

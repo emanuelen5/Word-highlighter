@@ -26,7 +26,7 @@ def send_api_command(command_name, setting_field, settings_name=None):
     sublime.run_command(command_name, {'settings': settings_name})
     has_set_value = settings.has(setting_field)
     value = settings.get(setting_field)
-    value, has_set_value
+    return value, has_set_value
 
 def color_picker_is_installed():
     color_value, has_set_value = send_api_command("color_pick_api_is_available", "color_pick_return")
@@ -35,6 +35,14 @@ def color_picker_is_installed():
 def open_color_picker_menu():
     color_value, has_set_value = send_api_command("color_pick_api_get_color", "color_pick_return")
     return color_value
+
+class wordHighlighterColorPicker(sublime_plugin.TextCommand):
+    def run(self, edit):
+        if color_picker_is_installed():
+            logger.info("Color picker is installed")
+        else:
+            logger.info("Color picker is NOT installed")
+        logger.info("Color value chosen: {}".format(open_color_picker_menu()))
 
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
