@@ -37,7 +37,15 @@ class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.Collectionab
             <a href=\"link_2\" style=\"color:red\">Link 2</a><br>
         """
         content = re.sub(r'\s*^\s*', "", content, flags=re.MULTILINE) # Undo the multi-line string we created into a one-liner
-        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=self.navigate)
+
+        sel = self.view.sel()
+        for sr in sel:
+            sr = sublime.Region(sr.begin()-1, sr.end()+1)
+            for w in self.collection.words:
+                for wr in w.find_all_regions(self.view):
+                    if wr.intersects(sr):
+                        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, location=min(sr.end(), wr.end()), max_width=500, max_height=500, on_navigate=self.navigate)
+                        return
 
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
