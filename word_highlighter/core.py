@@ -1,5 +1,6 @@
 import sublime
 import word_highlighter.helpers as helpers
+import copy
 
 logger = helpers.get_logger()
 
@@ -186,7 +187,7 @@ class WordHighlightCollection(object):
         if self.has_word(word):
             w = self.get_word_highlight(word)
             self.words.remove(w)
-            self.removed_words.append(w)
+            self.removed_words.append(copy.deepcopy(w))
 
     def clear(self):
         logger.debug("Clearing all highlighted words")

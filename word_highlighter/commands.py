@@ -25,18 +25,27 @@ def plugin_loaded():
     logger.info("Debounce time: {}".format(settings.get("debounce")))
 
 class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
-    def navigate(self, link_string:str):
-        print("Link string: {}".format(link_string))
+    def navigate(self, word, chosen_color:str):
+        color = core.ColorType(chosen_color)
+        self.collection._remove_word(word) # Make sure to remove old highlight
+        word.set_color(color)
+        self.collection._add_word(word)
+        self.collection.update()
+        self.save_collection()
         self.view.hide_popup()
 
+    def show_word_color_menu(self, word, location=sublime.POPUP_LOCATION_AT_CURSOR):
+        content = "<h3>Change highlight color</h3>"
+        link_template = "<a href=\"{color_name}\">{disp_name}</a><br>"
+        for idx, color in enumerate(core.SCOPE_COLORS):
+            content += link_template.format(color_name=color, disp_name="Color " + str(idx))
+        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, location=location, max_width=500, max_height=500, on_navigate=save_argument_wrapper(self.navigate, word))
+
     def run(self, edit):
+        self._run()
+
+    def _run(self):
         self.load_collection()
-        content = """
-            <h3>Word highlighter menu</h3>
-            <a href=\"link_1\">Link 1</a><br>
-            <a href=\"link_2\" style=\"color:red\">Link 2</a><br>
-        """
-        content = re.sub(r'\s*^\s*', "", content, flags=re.MULTILINE) # Undo the multi-line string we created into a one-liner
 
         sel = self.view.sel()
         for sr in sel:
@@ -44,7 +53,7 @@ class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.Collectionab
             for w in self.collection.words:
                 for wr in w.find_all_regions(self.view):
                     if wr.intersects(sr):
-                        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, location=min(sr.end(), wr.end()), max_width=500, max_height=500, on_navigate=self.navigate)
+                        self.show_word_color_menu(w, min(sr.end(), wr.end()))
                         return
 
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
