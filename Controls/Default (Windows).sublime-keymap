@@ -1,9 +1,17 @@
+// All start with alt+k, h (for Highlight)
 [
+    // ... word
     {"keys": ["alt+k", "h", "w"],           "command": "word_highlighter_highlight_instances_of_selection"},
+    // ... clear
     {"keys": ["alt+k", "h", "c"],           "command": "word_highlighter_clear_instances"},
+    // ... edit regexp
     {"keys": ["alt+k", "h", "e", "r"],      "command": "word_highlighter_edit_regexp"},
+    // ... edit highlight
     {"keys": ["alt+k", "h", "e", "h"],      "command": "word_highlighter_word_color_menu"},
+    // ... new regexp
     {"keys": ["alt+k", "h", "n", "r"],      "command": "word_highlighter_create_regexp"},
+    // ... menu clear
     {"keys": ["alt+k", "h", "m", "c"],      "command": "word_highlighter_clear_menu"},
+    // ... menu edit regexp
     {"keys": ["alt+k", "h", "m", "e", "r"], "command": "word_highlighter_edit_regexp_menu"},
 ]
