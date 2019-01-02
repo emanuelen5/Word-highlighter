@@ -12,11 +12,32 @@ import threading
 import word_highlighter.helpers as helpers
 logger = helpers.get_logger()
 
+# Monkey-patching some good-to-have constants
+sublime.INDEX_NONE_CHOSEN = -1
+sublime.POPUP_LOCATION_AT_CURSOR = -1
+
+import re
+
 def plugin_loaded():
     logger.info("Loading module")
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
+
+class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
+    def navigate(self, link_string:str):
+        print("Link string: {}".format(link_string))
+        self.view.hide_popup()
+
+    def run(self, edit):
+        self.load_collection()
+        content = """
+            <h3>Word highlighter menu</h3>
+            <a href=\"link_1\">Link 1</a><br>
+            <a href=\"link_2\" style=\"color:red\">Link 2</a><br>
+        """
+        content = re.sub(r'\s*^\s*', "", content, flags=re.MULTILINE) # Undo the multi-line string we created into a one-liner
+        self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, sublime.POPUP_LOCATION_AT_CURSOR, max_width=500, max_height=500, on_navigate=self.navigate)
 
 class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
@@ -83,9 +104,6 @@ def save_argument_wrapper(callback, *const_args, **const_kwargs):
         kwargs = dict(const_kwargs, **kwargs)
         return callback(*args, **kwargs)
     return saved_argument_callback
-
-# Monkey-patching some good-to-have constants
-sublime.INDEX_NONE_CHOSEN = -1
 
 # Menu for clearing highlighted words
 class wordHighlighterClearMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
