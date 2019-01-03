@@ -12,6 +12,8 @@ It is inspired by the Emacs plugin [highlight-symbol](http://nschum.de/src/emacs
 
 Toggles highlights based on the current selection.
 
+![Recording of using the highlight selection command](doc/highlight_selection.gif)
+
 * If the selection has zero width, it is expanded to the word boundary and will only match at the same word boundary.
 * If the selection has non-zero width, the the whole selection will be matched irrespective of word boundaries.
 
