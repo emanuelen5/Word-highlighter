@@ -36,9 +36,9 @@ class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.Collectionab
 
     def show_word_color_menu(self, word, location=sublime.POPUP_LOCATION_AT_CURSOR):
         content = "<h3>Change highlight color</h3>"
-        link_template = "<a href=\"{color_name}\">{disp_name}</a><br>"
+        link_template = "<a href=\"{color_name}\" style=\"color:{color};background:{background}\">{disp_name}</a><br>"
         for idx, color in enumerate(core.SCOPE_COLORS):
-            content += link_template.format(color_name=color, disp_name="Color " + str(idx))
+            content += link_template.format(color_name=color, disp_name="Color " + str(idx), color="black", background="none")
         self.view.show_popup(content, sublime.HIDE_ON_MOUSE_MOVE_AWAY, location=location, max_width=500, max_height=500, on_navigate=save_argument_wrapper(self.navigate, word))
 
     def run(self, edit):
