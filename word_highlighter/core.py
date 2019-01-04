@@ -1,6 +1,8 @@
 import sublime
 import word_highlighter.helpers as helpers
 import copy
+import os
+import re
 
 logger = helpers.get_logger()
 
@@ -9,8 +11,12 @@ def plugin_loaded():
 
 ## Define some color constants
 class ColorType(object):
-    def __init__(self, color_string):
+    def __init__(self, color_string, name=None, foreground=None, background=None):
         self.color_string = color_string
+        self.scope = color_string
+        self.name = name
+        self.foreground = foreground
+        self.background = background
 
     def __eq__(self, right):
         if isinstance(right, str):
@@ -22,6 +28,30 @@ class ColorType(object):
 
     def __str__(self):
         return self.color_string
+
+    def __repr__(self):
+        return "<{}, {}, {}, {}>".format(self.scope, self.name, self.foreground, self.background)
+
+def lookup_color(color_string, variables):
+    r = re.compile(r'var\((.*)\)')
+    m = r.match(color_string.strip())
+    if not m:
+        return color_string
+
+    var_name = m.group(1).strip()
+    if var_name not in variables:
+        logger.error("The variable {} does not exist among the variables!".format(var_name))
+        return color_string
+    return variables[var_name]
+
+def get_colors(view):
+    color_scheme = os.path.basename(view.settings().get("color_scheme"))
+    s = sublime.load_settings(color_scheme)
+    variables = s.get("variables")
+    colors = []
+    for rule in s.get("rules"):
+        colors.append(ColorType(rule["scope"], rule["name"], lookup_color(rule["foreground"], variables), lookup_color(rule["background"], variables)))
+    return colors
 
 # Add some base colors to use for selections (perhaps read from settings file)
 SCOPE_COLORS = ["word_highlighter.color{}".format(i) for i in range(10)]
