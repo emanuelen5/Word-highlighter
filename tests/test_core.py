@@ -1,5 +1,9 @@
 import sublime
 from unittest.mock import patch
+
+from word_highlighter import plugin_loaded
+plugin_loaded()
+
 import word_highlighter.core as core
 from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 

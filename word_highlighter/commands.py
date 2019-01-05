@@ -11,6 +11,7 @@ import threading
 
 from . import helpers
 logger = None
+is_loaded = False
 
 # Monkey-patching some good-to-have constants
 sublime.INDEX_NONE_CHOSEN = -1
@@ -19,12 +20,13 @@ sublime.POPUP_LOCATION_AT_CURSOR = -1
 import re
 
 def plugin_loaded():
-    global logger
+    global logger, is_loaded
     logger = helpers.get_logger()
     logger.info("Loading module")
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
+    is_loaded = True
 
 class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
     def navigate(self, word, chosen_color:str):
@@ -92,6 +94,8 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         return self.view.settings().get("color_scheme")
 
     def create_color_scheme(self):
+        if not is_loaded:
+            return
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return

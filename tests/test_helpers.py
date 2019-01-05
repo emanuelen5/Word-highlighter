@@ -1,6 +1,10 @@
 import sublime
 import unittest
 from unittest.mock import MagicMock
+
+from word_highlighter import plugin_loaded
+plugin_loaded()
+
 import word_highlighter.helpers as helpers
 
 class TestIsCaseSensitiveLanguage(unittest.TestCase):

@@ -1,5 +1,9 @@
 import sublime
 from unittest.mock import MagicMock, patch
+
+from word_highlighter import plugin_loaded
+plugin_loaded()
+
 import word_highlighter.commands as commands
 import word_highlighter.core as core
 import word_highlighter.helpers as helpers
