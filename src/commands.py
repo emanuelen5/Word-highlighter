@@ -99,7 +99,7 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return
-        template_path = os.path.join(helpers.dirs.color_schemes, "word_highlighter.template-sublime-color-scheme")
+        template_path = os.path.join(helpers.dirs.base, "word_highlighter.template-sublime-color-scheme")
         scheme_copy_path = os.path.join(helpers.dirs.color_schemes, os.path.basename(current_color_scheme))
 
         if current_color_scheme == self.last_color_scheme:
