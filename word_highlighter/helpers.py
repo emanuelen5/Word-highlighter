@@ -3,13 +3,15 @@ import logging
 import inspect
 
 import os
-__dir__ = os.path.dirname(os.path.realpath(__file__))
-base_dir = os.path.realpath(os.path.join(__dir__, '..'))
-logs_dir = os.path.join(base_dir, 'logs')
-color_schemes_dir = os.path.join(base_dir, "Color Schemes")
+
+class Dirs(object):
+    pass
+dirs = Dirs()
 
 def plugin_loaded():
-    pass
+    dirs.word_highlighter = os.path.join(sublime.packages_path(), "Word-highlighter")
+    dirs.logs = os.path.join(dirs.word_highlighter, 'logs')
+    dirs.color_schemes = os.path.join(dirs.word_highlighter, "Color Schemes")
 
 # Check that select bits are set
 def bits_set(value, *bits):
@@ -19,8 +21,8 @@ def bits_set(value, *bits):
 
 def get_logfile_path(filename):
     basename = os.path.splitext(os.path.basename(filename))[0]
-    log_file = os.path.join(logs_dir, basename + ".log")
-    os.makedirs(logs_dir, exist_ok=True)
+    log_file = os.path.join(dirs.logs, basename + ".log")
+    os.makedirs(dirs.logs, exist_ok=True)
     return log_file
 
 def get_settings():

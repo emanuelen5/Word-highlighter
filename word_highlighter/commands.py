@@ -1,6 +1,6 @@
 import sublime
 import sublime_plugin
-import word_highlighter.core as core
+from . import core
 
 # For automatically creating color schemes for the highlighter
 import shutil
@@ -9,8 +9,8 @@ import os
 # For updating the highlighting on modifications of text
 import threading
 
-import word_highlighter.helpers as helpers
-logger = helpers.get_logger()
+from . import helpers
+logger = None
 
 # Monkey-patching some good-to-have constants
 sublime.INDEX_NONE_CHOSEN = -1
@@ -19,6 +19,7 @@ sublime.POPUP_LOCATION_AT_CURSOR = -1
 import re
 
 def plugin_loaded():
+    logger = helpers.get_logger()
     logger.info("Loading module")
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
@@ -93,8 +94,8 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return
-        template_path = os.path.join(helpers.color_schemes_dir, "word_highlighter.template-sublime-color-scheme")
-        scheme_copy_path = os.path.join(helpers.color_schemes_dir, os.path.basename(current_color_scheme))
+        template_path = os.path.join(helpers.dirs.color_schemes, "word_highlighter.template-sublime-color-scheme")
+        scheme_copy_path = os.path.join(helpers.dirs.color_schemes, os.path.basename(current_color_scheme))
 
         if current_color_scheme == self.last_color_scheme:
             return

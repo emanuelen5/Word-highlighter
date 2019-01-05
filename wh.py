@@ -3,15 +3,15 @@ import sys
 from . import word_highlighter  # noqa: F402
 sys.modules["word_highlighter"] = word_highlighter
 
-from word_highlighter.commands import update_words_event
-from word_highlighter.commands import update_color_scheme_event
-from word_highlighter.commands import wordHighlighterClearInstances
-from word_highlighter.commands import wordHighlighterClearMenu
-from word_highlighter.commands import wordHighlighterHighlightInstancesOfSelection
-from word_highlighter.commands import wordHighlighterEditRegexp
-from word_highlighter.commands import wordHighlighterCreateRegexp
-from word_highlighter.commands import wordHighlighterEditRegexpMenu
-from word_highlighter.commands import wordHighlighterWordColorMenu
+from .word_highlighter.commands import update_words_event
+from .word_highlighter.commands import update_color_scheme_event
+from .word_highlighter.commands import wordHighlighterClearInstances
+from .word_highlighter.commands import wordHighlighterClearMenu
+from .word_highlighter.commands import wordHighlighterHighlightInstancesOfSelection
+from .word_highlighter.commands import wordHighlighterEditRegexp
+from .word_highlighter.commands import wordHighlighterCreateRegexp
+from .word_highlighter.commands import wordHighlighterEditRegexpMenu
+from .word_highlighter.commands import wordHighlighterWordColorMenu
 
 def plugin_loaded():
     word_highlighter.commands.plugin_loaded()
