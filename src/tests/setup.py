@@ -1,6 +1,6 @@
 import unittest
 import sublime
-import word_highlighter.core as core
+import word_highlighter.src.core as core
 
 class SublimeText_TestCase(unittest.TestCase):
     def setUp(self):

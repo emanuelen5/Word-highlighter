@@ -2,10 +2,10 @@ import sublime
 import unittest
 from unittest.mock import MagicMock
 
-from word_highlighter import plugin_loaded
+from word_highlighter.wh import plugin_loaded
 plugin_loaded()
 
-import word_highlighter.helpers as helpers
+import word_highlighter.src.helpers as helpers
 
 class TestIsCaseSensitiveLanguage(unittest.TestCase):
     def assertLanguageCaseSensitivity(self, case_sensitivity, language):

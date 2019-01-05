@@ -9,7 +9,7 @@ class Dirs(object):
 dirs = Dirs()
 
 def plugin_loaded():
-    dirs.word_highlighter = os.path.join(sublime.packages_path(), "Word-highlighter")
+    dirs.word_highlighter = os.path.join(sublime.packages_path(), "word_highlighter")
     dirs.logs = os.path.join(dirs.word_highlighter, 'logs')
     dirs.color_schemes = os.path.join(dirs.word_highlighter, "Color Schemes")
 
