@@ -7,6 +7,7 @@ import re
 logger = None
 
 def plugin_loaded():
+    global logger
     logger = helpers.get_logger()
 
 ## Define some color constants

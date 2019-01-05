@@ -19,6 +19,7 @@ sublime.POPUP_LOCATION_AT_CURSOR = -1
 import re
 
 def plugin_loaded():
+    global logger
     logger = helpers.get_logger()
     logger.info("Loading module")
     settings = helpers.get_settings()
