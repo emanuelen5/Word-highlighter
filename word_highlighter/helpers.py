@@ -32,12 +32,11 @@ def get_logger(module_name=None, file_name=None):
 
     if module_name is None or file_name is None:
         caller_frame = inspect.stack()[1]
-        caller_module = inspect.getmodule(caller_frame[0])
 
-    if module_name is None:
-        module_name = caller_module.__name__
     if file_name is None:
-        file_name = caller_module.__file__
+        file_name = caller_frame[1]
+    if module_name is None:
+        module_name = os.path.splitext(os.path.basename(file_name))[0]
 
     logger = logging.getLogger(module_name)
     logger.setLevel(logging.DEBUG)
