@@ -2,3 +2,4 @@
 *.log
 Color Schemes/*.sublime-color-scheme
 htmlcov/
+*.pyc
