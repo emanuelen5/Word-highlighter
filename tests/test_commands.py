@@ -1,8 +1,12 @@
 import sublime
 from unittest.mock import MagicMock, patch
-import word_highlighter.commands as commands
-import word_highlighter.core as core
-import word_highlighter.helpers as helpers
+
+from word_highlighter.sublime_plugin import plugin_loaded
+plugin_loaded()
+
+import word_highlighter.src.commands as commands
+import word_highlighter.src.core as core
+import word_highlighter.src.helpers as helpers
 from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 def clip(min_val, val, max_val):

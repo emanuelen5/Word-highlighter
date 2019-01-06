@@ -4,12 +4,24 @@ import inspect
 
 import os
 __dir__ = os.path.dirname(os.path.realpath(__file__))
-base_dir = os.path.realpath(os.path.join(__dir__, '..'))
-logs_dir = os.path.join(base_dir, 'logs')
-color_schemes_dir = os.path.join(base_dir, "Color Schemes")
+
+class Dirs(object):
+    pass
+dirs = Dirs()
+_is_loaded = False
 
 def plugin_loaded():
-    pass
+    global _is_loaded
+    if _is_loaded:
+        return
+    dirs.base = os.path.realpath(os.path.join(__dir__, '..'))
+    dirs.word_highlighter = os.path.join(sublime.packages_path(), "word_highlighter")
+    dirs.logs = os.path.join(dirs.word_highlighter, 'logs')
+    dirs.color_schemes = os.path.join(dirs.word_highlighter, "color_schemes")
+    #  Make sure output directories exist
+    os.makedirs(dirs.logs, exist_ok=True)
+    os.makedirs(dirs.color_schemes, exist_ok=True)
+    _is_loaded = True
 
 # Check that select bits are set
 def bits_set(value, *bits):
@@ -19,8 +31,7 @@ def bits_set(value, *bits):
 
 def get_logfile_path(filename):
     basename = os.path.splitext(os.path.basename(filename))[0]
-    log_file = os.path.join(logs_dir, basename + ".log")
-    os.makedirs(logs_dir, exist_ok=True)
+    log_file = os.path.join(dirs.logs, basename + ".log")
     return log_file
 
 def get_settings():
@@ -30,12 +41,11 @@ def get_logger(module_name=None, file_name=None):
 
     if module_name is None or file_name is None:
         caller_frame = inspect.stack()[1]
-        caller_module = inspect.getmodule(caller_frame[0])
 
-    if module_name is None:
-        module_name = caller_module.__name__
     if file_name is None:
-        file_name = caller_module.__file__
+        file_name = caller_frame[1]
+    if module_name is None:
+        module_name = os.path.splitext(os.path.basename(file_name))[0]
 
     logger = logging.getLogger(module_name)
     logger.setLevel(logging.DEBUG)

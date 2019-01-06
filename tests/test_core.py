@@ -1,6 +1,10 @@
 import sublime
 from unittest.mock import patch
-import word_highlighter.core as core
+
+from word_highlighter.sublime_plugin import plugin_loaded
+plugin_loaded()
+
+import word_highlighter.src.core as core
 from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 class TestColorPickingSchemes(WordHighlighter_TestCase):

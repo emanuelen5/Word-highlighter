@@ -1,13 +1,16 @@
 import sublime
-import word_highlighter.helpers as helpers
+from . import helpers
 import copy
 import os
 import re
 
-logger = helpers.get_logger()
+logger = None
 
 def plugin_loaded():
-    pass
+    global logger
+    helpers.plugin_loaded()
+    logger = helpers.get_logger()
+    logger.info("Loading " + __name__)
 
 ## Define some color constants
 class ColorType(object):

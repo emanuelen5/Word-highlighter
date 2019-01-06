@@ -1,6 +1,6 @@
 import sublime
 import sublime_plugin
-import word_highlighter.core as core
+from . import core
 
 # For automatically creating color schemes for the highlighter
 import shutil
@@ -9,8 +9,9 @@ import os
 # For updating the highlighting on modifications of text
 import threading
 
-import word_highlighter.helpers as helpers
-logger = helpers.get_logger()
+from . import helpers
+logger = None
+is_loaded = False
 
 # Monkey-patching some good-to-have constants
 sublime.INDEX_NONE_CHOSEN = -1
@@ -19,10 +20,14 @@ sublime.POPUP_LOCATION_AT_CURSOR = -1
 import re
 
 def plugin_loaded():
-    logger.info("Loading module")
+    global logger, is_loaded
+    helpers.plugin_loaded()
+    logger = helpers.get_logger()
+    logger.info("Loading " + __name__)
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
+    is_loaded = True
 
 class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
     def navigate(self, word, chosen_color:str):
@@ -90,21 +95,21 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         return self.view.settings().get("color_scheme")
 
     def create_color_scheme(self):
+        if not is_loaded:
+            return
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return
-        template_path = os.path.join(helpers.color_schemes_dir, "word_highlighter.template-sublime-color-scheme")
-        scheme_copy_path = os.path.join(helpers.color_schemes_dir, os.path.basename(current_color_scheme))
 
         if current_color_scheme == self.last_color_scheme:
             return
-        if os.path.isfile(scheme_copy_path) and os.path.getmtime(template_path) <= os.path.getmtime(scheme_copy_path):
-            if self.last_color_scheme is not None:
-                logger.debug("There already exists a newer scheme than the template")
-            return
 
         logger.info("Adding color scheme {}".format(current_color_scheme))
-        shutil.copy(template_path, scheme_copy_path)
+        scheme_name = os.path.splitext(os.path.basename(current_color_scheme))[0]
+        scheme_dest_path = os.path.join(helpers.dirs.color_schemes, scheme_name + os.extsep + "sublime-color-scheme")
+        template_contents = sublime.load_resource("Packages/word_highlighter/word_highlighter.template-sublime-color-scheme")
+        with open(scheme_dest_path, "w") as f:
+            f.write(template_contents)
         self.last_color_scheme = current_color_scheme
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
