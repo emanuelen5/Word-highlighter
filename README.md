@@ -49,5 +49,12 @@ Create a new highlight by entering a regexp.
 
 Edit the selected highlight's color (under the cursor).
 
+## Settings
+
+| Setting name           | Default value | Description                                                                                                                                        |
+|------------------------|---------------|---------------------------------------------------------------|
+| `debounce`             | 0.1           | Maximum update rate of highlights when editing file [seconds]                                                                                      |
+| `color_picking_scheme` | *CYCLIC*      | The way to select the next color for the highlight. Any of the following: *CYCLIC*, *CYCLIC_EVEN*, *CYCLIC_EVEN_ORDERED*, *RANDOM*, *RANDOM_EVEN*. |
+
 ## Installation
 Clone the repository and rename it to *word_highlighter*. Place it in the Sublime text *Packages* folder (**Preferences -> Browse Packages...**).
