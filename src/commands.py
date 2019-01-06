@@ -104,7 +104,8 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
             return
 
         logger.info("Adding color scheme {}".format(current_color_scheme))
-        scheme_dest_path = os.path.join(helpers.dirs.color_schemes, os.path.basename(current_color_scheme))
+        scheme_name = os.path.splitext(os.path.basename(current_color_scheme))[0]
+        scheme_dest_path = os.path.join(helpers.dirs.color_schemes, scheme_name + os.extsep + "sublime-color-scheme")
         template_contents = sublime.load_resource("Packages/word_highlighter/word_highlighter.template-sublime-color-scheme")
         with open(scheme_dest_path, "w") as f:
             f.write(template_contents)
