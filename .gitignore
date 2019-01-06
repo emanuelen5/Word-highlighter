@@ -1,5 +1,5 @@
 *.html
-*.log
-Color Schemes/*.sublime-color-scheme
+logs/
+color_schemes/
 htmlcov/
 *.pyc
