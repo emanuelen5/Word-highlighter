@@ -22,7 +22,7 @@ import re
 def plugin_loaded():
     global logger, is_loaded
     logger = helpers.get_logger()
-    logger.info("Loading module")
+    logger.info("Loading " + __name__)
     settings = helpers.get_settings()
     logger.info("Color picking scheme: {}".format(settings.get("color_picking_scheme")))
     logger.info("Debounce time: {}".format(settings.get("debounce")))
