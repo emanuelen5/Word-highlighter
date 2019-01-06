@@ -23,3 +23,6 @@ Toggles highlights based on the current selection.
 <kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>c</kbd>
 
 Clears all highlights.
+
+## Installation
+Clone the repository and rename it to *word_highlighter*. Place it in the Sublime text *Packages* folder (**Preferences -> Browse Packages...**).
