@@ -24,5 +24,30 @@ Toggles highlights based on the current selection.
 
 Clears all highlights.
 
+### Clear highlights menu
+<kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>m</kbd>, <kbd>c</kbd>
+
+Get a list of all highlights and select which ones to clear from the view.
+
+### Edit regexp of selection
+<kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>e</kbd>, <kbd>r</kbd>
+
+Edit the selected highlight's regexp (under the cursor).
+
+### Edit regexp menu
+<kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>m</kbd>, <kbd>e</kbd>, <kbd>r</kbd>
+
+Edit the regexp for a highlighted by selecting from a menu (list of all highlights).
+
+### New highlight from regexp
+<kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>n</kbd>, <kbd>r</kbd>
+
+Create a new highlight by entering a regexp.
+
+### Edit highlight color
+<kbd>alt</kbd>+<kbd>k</kbd>, <kbd>h</kbd>, <kbd>e</kbd>, <kbd>h</kbd>
+
+Edit the selected highlight's color (under the cursor).
+
 ## Installation
 Clone the repository and rename it to *word_highlighter*. Place it in the Sublime text *Packages* folder (**Preferences -> Browse Packages...**).
