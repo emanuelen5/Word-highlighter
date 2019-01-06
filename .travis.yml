@@ -1,6 +1,6 @@
 env:
     global:
-        - PACKAGE="Word-highlighter" # Package name
+        - PACKAGE="word_highlighter" # Package name
         - SUBLIME_TEXT_VERSION="3"
         # use UNITTESTING_TAG to specific tag of UnitTesting
         # - UNITTESTING_TAG="master"
@@ -32,6 +32,7 @@ install:
 
 script:
     # run tests with test coverage report
+    - sh travis.sh run_tests
     - sh travis.sh run_tests --coverage
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests
