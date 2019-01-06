@@ -1,4 +1,5 @@
-import word_highlighter
+# Entry point for Sublime text when loading the plugin
+import word_highlighter # This corresponds to this plugin's root directory
 
 def plugin_loaded():
     word_highlighter.src.helpers.plugin_loaded()
