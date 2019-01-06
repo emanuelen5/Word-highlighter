@@ -1,0 +1,23 @@
+================================================================================
+Word Highlighter v1.0.0
+================================================================================
+
+Yay, I have finally released my plugin! 🎉
+
+Overview
+--------------------------------------------------------------------------------
+All known bugs have been fixed and some decent documentation has been added. 
+The most basic features have been added, as well as unit testing with code
+coverage reporting.
+
+Current features
+--------------------------------------------------------------------------------
+* Adding and removing words/patterns to be highlighted
+* Automatically adding highlight scopes to current color scheme
+* Entering custom regexp patterns for highlights
+* Changing color of existing highlights (between pre-defined values)
+* Selecting between 5 color scheme picking strategies/schemes
+
+--------------------------------------------------------------------------------
+Documentation, source code, feature requests and bug reports are all on Github:
+https://github.com/emanuelen5/Word-Highlighter

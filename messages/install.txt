@@ -1,0 +1,8 @@
+================================================================================
+Thank you for installing Word Highlighter 💙💛
+================================================================================
+
+If you like the plugin, consider supporting me on Patreon or Liberapay. ☕😇
+
+Documentation, source code, feature requests and bug reports are all on Github:
+https://github.com/emanuelen5/Word-Highlighter
