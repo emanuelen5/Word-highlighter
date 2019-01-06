@@ -8,6 +8,7 @@ logger = None
 
 def plugin_loaded():
     global logger
+    helpers.plugin_loaded()
     logger = helpers.get_logger()
     logger.info("Loading " + __name__)
 

@@ -8,8 +8,12 @@ __dir__ = os.path.dirname(os.path.realpath(__file__))
 class Dirs(object):
     pass
 dirs = Dirs()
+_is_loaded = False
 
 def plugin_loaded():
+    global _is_loaded
+    if _is_loaded:
+        return
     dirs.base = os.path.realpath(os.path.join(__dir__, '..'))
     dirs.word_highlighter = os.path.join(sublime.packages_path(), "word_highlighter")
     dirs.logs = os.path.join(dirs.word_highlighter, 'logs')
@@ -17,6 +21,7 @@ def plugin_loaded():
     #  Make sure output directories exist
     os.makedirs(dirs.logs, exist_ok=True)
     os.makedirs(dirs.color_schemes, exist_ok=True)
+    _is_loaded = True
 
 # Check that select bits are set
 def bits_set(value, *bits):

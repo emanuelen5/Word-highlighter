@@ -21,6 +21,7 @@ import re
 
 def plugin_loaded():
     global logger, is_loaded
+    helpers.plugin_loaded()
     logger = helpers.get_logger()
     logger.info("Loading " + __name__)
     settings = helpers.get_settings()
