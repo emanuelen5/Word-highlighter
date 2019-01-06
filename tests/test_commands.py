@@ -7,7 +7,7 @@ plugin_loaded()
 import word_highlighter.src.commands as commands
 import word_highlighter.src.core as core
 import word_highlighter.src.helpers as helpers
-from word_highlighter.src.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
+from word_highlighter.tests.setup import SublimeText_TestCase, WordHighlighter_TestCase
 
 def clip(min_val, val, max_val):
     return min(max(min_val, val), max_val)
