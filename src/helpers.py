@@ -17,7 +17,7 @@ def plugin_loaded():
     dirs.base = os.path.realpath(os.path.join(__dir__, '..'))
     dirs.word_highlighter = os.path.join(sublime.packages_path(), "word_highlighter")
     dirs.logs = os.path.join(dirs.word_highlighter, 'logs')
-    dirs.color_schemes = os.path.join(dirs.word_highlighter, "Color Schemes")
+    dirs.color_schemes = os.path.join(dirs.word_highlighter, "color_schemes")
     #  Make sure output directories exist
     os.makedirs(dirs.logs, exist_ok=True)
     os.makedirs(dirs.color_schemes, exist_ok=True)
