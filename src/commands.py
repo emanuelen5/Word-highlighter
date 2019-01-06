@@ -99,18 +99,15 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
         current_color_scheme = self.get_color_scheme()
         if current_color_scheme is None:
             return
-        template_path = os.path.join(helpers.dirs.base, "word_highlighter.template-sublime-color-scheme")
-        scheme_copy_path = os.path.join(helpers.dirs.color_schemes, os.path.basename(current_color_scheme))
 
         if current_color_scheme == self.last_color_scheme:
             return
-        if os.path.isfile(scheme_copy_path) and os.path.getmtime(template_path) <= os.path.getmtime(scheme_copy_path):
-            if self.last_color_scheme is not None:
-                logger.debug("There already exists a newer scheme than the template")
-            return
 
         logger.info("Adding color scheme {}".format(current_color_scheme))
-        shutil.copy(template_path, scheme_copy_path)
+        scheme_dest_path = os.path.join(helpers.dirs.color_schemes, os.path.basename(current_color_scheme))
+        template_contents = sublime.load_resource("Packages/word_highlighter/word_highlighter.template-sublime-color-scheme")
+        with open(scheme_dest_path, "w") as f:
+            f.write(template_contents)
         self.last_color_scheme = current_color_scheme
 
 class wordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
