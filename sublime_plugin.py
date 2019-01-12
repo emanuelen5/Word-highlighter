@@ -1,10 +1,9 @@
-# Entry point for Sublime text when loading the plugin
-import word_highlighter # This corresponds to this plugin's root directory
+from .src import helpers, commands, core
 
 def plugin_loaded():
-    word_highlighter.src.helpers.plugin_loaded()
-    word_highlighter.src.commands.plugin_loaded()
-    word_highlighter.src.core.plugin_loaded()
+    helpers.plugin_loaded()
+    commands.plugin_loaded()
+    core.plugin_loaded()
 
 from .src.commands import update_words_event
 from .src.commands import update_color_scheme_event
