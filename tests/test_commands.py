@@ -57,13 +57,13 @@ class TestHighlighting(SublimeText_TestCase):
 class TestWordHighlighterClearMenu(WordHighlighter_TestCase, core.CollectionableMixin):
     def setUp(self):
         super(TestWordHighlighterClearMenu, self).setUp()
-        self.wordHighlighterClearMenu = commands.wordHighlighterClearMenu(self.view)
+        self.WordHighlighterClearMenu = commands.WordHighlighterClearMenu(self.view)
 
     def test_quick_panel_is_called(self):
         self.set_buffer("")
-        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
+        with patch.object(self.WordHighlighterClearMenu.view, "window") as mock_window_method:
             mock_window_method.return_value.show_quick_panel.side_effect=(None)
-            self.wordHighlighterClearMenu._run()
+            self.WordHighlighterClearMenu._run()
         self.assertTrue(mock_window_method.return_value.show_quick_panel.called)
 
     def test_clearing_all_words(self):
@@ -79,26 +79,26 @@ class TestWordHighlighterClearMenu(WordHighlighter_TestCase, core.Collectionable
             return callback(clip(-1, selected_index, len(items)-1))
 
         # Do the actual testing
-        with patch.object(self.wordHighlighterClearMenu.view, "window") as mock_window_method:
+        with patch.object(self.WordHighlighterClearMenu.view, "window") as mock_window_method:
             mock_window_method.return_value.show_quick_panel.side_effect = show_quick_panel_mock_call__select_last_item
-            self.wordHighlighterClearMenu._run()
+            self.WordHighlighterClearMenu._run()
         self.assertEqual(4, len(mock_window_method.return_value.show_quick_panel.mock_calls))
 
 class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.CollectionableMixin):
     def setUp(self):
         super(TestWordHighlighterEditRegexp, self).setUp()
-        self.wordHighlighterEditRegexp = commands.wordHighlighterEditRegexp(self.view)
+        self.WordHighlighterEditRegexp = commands.WordHighlighterEditRegexp(self.view)
         # Set collection to point out word
         self.set_buffer("word1 word2 word3")
         self.collection._add_word(core.WordHighlight("word1"))
         self.save_collection()
-        self.wordHighlighterEditRegexp.load_collection()
-        self.word = self.wordHighlighterEditRegexp.collection.words[0]
+        self.WordHighlighterEditRegexp.load_collection()
+        self.word = self.WordHighlighterEditRegexp.collection.words[0]
         self.view.sel().clear()
 
     def assertInputNewRegexIsCalled(self):
-        with patch.object(self.wordHighlighterEditRegexp, "edit_regex") as mock_input:
-            self.wordHighlighterEditRegexp._run()
+        with patch.object(self.WordHighlighterEditRegexp, "edit_regex") as mock_input:
+            self.WordHighlighterEditRegexp._run()
         self.assertTrue(mock_input.called)
 
     def test_input_new_regex_is_called_when_selection_in_word(self):
@@ -114,20 +114,20 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
         self.assertInputNewRegexIsCalled()
 
     def test_regex_is_set_on_done_empty(self):
-        on_done = self.wordHighlighterEditRegexp.create_on_done(self.word)
+        on_done = self.WordHighlighterEditRegexp.create_on_done(self.word)
         new_regex = "\b"
         on_done(new_regex)
-        self.assertEqual(0, len(self.wordHighlighterEditRegexp.collection.words))
+        self.assertEqual(0, len(self.WordHighlighterEditRegexp.collection.words))
 
     def test_regex_is_set_on_modified(self):
-        on_modified = self.wordHighlighterEditRegexp.create_on_modified(self.word)
+        on_modified = self.WordHighlighterEditRegexp.create_on_modified(self.word)
         new_regex = "word2"
         on_modified(new_regex)
         self.assertEqual(new_regex, self.word.get_regex())
 
     def test_regex_is_reset_on_canceled(self):
         old_regex = self.word.get_regex()
-        on_canceled = self.wordHighlighterEditRegexp.create_on_canceled(self.word)
+        on_canceled = self.WordHighlighterEditRegexp.create_on_canceled(self.word)
         self.word.set_regex(old_regex + "_modified")
         on_canceled()
         self.assertEqual(old_regex, self.word.get_regex())
@@ -135,24 +135,24 @@ class TestWordHighlighterEditRegexp(WordHighlighter_TestCase, core.Collectionabl
 class TestWordHighlighterCreateRegexp(WordHighlighter_TestCase, core.CollectionableMixin):
     def setUp(self):
         super(TestWordHighlighterCreateRegexp, self).setUp()
-        self.wordHighlighterCreateRegexp = commands.wordHighlighterCreateRegexp(self.view)
+        self.WordHighlighterCreateRegexp = commands.WordHighlighterCreateRegexp(self.view)
         # Set collection to point out word
         self.set_buffer("word1 word2 word3")
         self.save_collection()
-        self.wordHighlighterCreateRegexp.load_collection()
+        self.WordHighlighterCreateRegexp.load_collection()
 
     def test_word_is_added(self):
-        with patch.object(self.wordHighlighterCreateRegexp, "edit_regex") as mock_input:
-            old_length = len(self.wordHighlighterCreateRegexp.collection.words)
-            self.wordHighlighterCreateRegexp._run()
+        with patch.object(self.WordHighlighterCreateRegexp, "edit_regex") as mock_input:
+            old_length = len(self.WordHighlighterCreateRegexp.collection.words)
+            self.WordHighlighterCreateRegexp._run()
             self.assertTrue(mock_input.called)
-            self.assertEqual(old_length+1, len(self.wordHighlighterCreateRegexp.collection.words))
+            self.assertEqual(old_length+1, len(self.WordHighlighterCreateRegexp.collection.words))
 
     def test_regex_is_removed_on_canceled(self):
-        collection = self.wordHighlighterCreateRegexp.collection
+        collection = self.WordHighlighterCreateRegexp.collection
         word = core.WordHighlight("word1")
         collection._add_word(word)
-        old_length = len(self.wordHighlighterCreateRegexp.collection.words)
-        on_canceled = self.wordHighlighterCreateRegexp.create_on_canceled(word)
+        old_length = len(self.WordHighlighterCreateRegexp.collection.words)
+        on_canceled = self.WordHighlighterCreateRegexp.create_on_canceled(word)
         on_canceled()
-        self.assertEqual(old_length-1, len(self.wordHighlighterCreateRegexp.collection.words))
+        self.assertEqual(old_length-1, len(self.WordHighlighterCreateRegexp.collection.words))

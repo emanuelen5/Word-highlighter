@@ -29,7 +29,7 @@ def plugin_loaded():
     logger.info("Debounce time: {}".format(settings.get("debounce")))
     is_loaded = True
 
-class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
+class WordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
     def navigate(self, word, chosen_color:str):
         color = core.ColorType(chosen_color)
         self.collection._remove_word(word) # Make sure to remove old highlight
@@ -61,7 +61,7 @@ class wordHighlighterWordColorMenu(sublime_plugin.TextCommand, core.Collectionab
                         self.show_word_color_menu(w, min(sr.end(), wr.end()))
                         return
 
-class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMixin):
+class WordHighlighterUpdateHighlightsEvent(sublime_plugin.ViewEventListener, core.CollectionableMixin):
     '''
     Runs an update of the highlights
     '''
@@ -82,7 +82,7 @@ class update_words_event(sublime_plugin.ViewEventListener, core.CollectionableMi
         self.debouncer = threading.Timer(self.debounce_time, self.update_highlighting)
         self.debouncer.start()
 
-class update_color_scheme_event(sublime_plugin.ViewEventListener):
+class WordHighlighterUpdateColorSchemeEvent(sublime_plugin.ViewEventListener):
     def __init__(self, view):
         self.view = view
         self.last_color_scheme = None
@@ -112,7 +112,7 @@ class update_color_scheme_event(sublime_plugin.ViewEventListener):
             f.write(template_contents)
         self.last_color_scheme = current_color_scheme
 
-class wordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
+class WordHighlighterClearInstances(sublime_plugin.TextCommand, core.CollectionableMixin):
     def __init__(self, view):
         self.view = view
 
@@ -128,7 +128,7 @@ def save_argument_wrapper(callback, *const_args, **const_kwargs):
     return saved_argument_callback
 
 # Menu for clearing highlighted words
-class wordHighlighterClearMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
+class WordHighlighterClearMenu(sublime_plugin.TextCommand, core.CollectionableMixin):
     @core.CollectionableMixin.update_collection_nonreentrant
     def _clear_word(self, original_words, chosen_index):
         self.collection._remove_word(original_words[chosen_index])
@@ -150,7 +150,7 @@ class wordHighlighterClearMenu(sublime_plugin.TextCommand, core.CollectionableMi
     def run(self, edit, index=0):
         self._run(index)
 
-class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, core.CollectionableMixin):
+class WordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, core.CollectionableMixin):
     """
     Highlights all instances of a specific word that is selected
     """
@@ -186,7 +186,7 @@ class wordHighlighterHighlightInstancesOfSelection(sublime_plugin.TextCommand, c
         self.collection.update()
         self.save_collection()
 
-class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableMixin):
+class WordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableMixin):
     '''
     Edit an existing regexp via an input panel
     '''
@@ -241,7 +241,7 @@ class wordHighlighterEditRegexp(sublime_plugin.TextCommand, core.CollectionableM
         self.collection.update()
         self.collection.save()
 
-class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
+class WordHighlighterCreateRegexp(WordHighlighterEditRegexp):
     '''
     Create a regexp via an input panel
     '''
@@ -263,7 +263,7 @@ class wordHighlighterCreateRegexp(wordHighlighterEditRegexp):
             self.collection.save()
         return on_canceled
 
-class wordHighlighterEditRegexpMenu(wordHighlighterEditRegexp):
+class WordHighlighterEditRegexpMenu(WordHighlighterEditRegexp):
     '''
     Edit regexp from a list of inputs
     '''
