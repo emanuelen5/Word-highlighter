@@ -27,7 +27,7 @@ class ColorType(object):
         elif isinstance(right, ColorType):
             return self.color_string == right.color_string
         else:
-            raise ValueError("Illegal type in comparison")
+            return NotImplemented
 
     def __str__(self):
         return self.color_string
@@ -232,7 +232,7 @@ class WordHighlightCollection(object):
     @classmethod
     def load(cls, view):
         import pickle
-        collection_stream = view.settings().get("wordhighlighter_collection")
+        collection_stream = view.settings().get("Wordhighlighter_collection")
         instance = pickle.loads(bytes(collection_stream))
         assert isinstance(instance, cls)
         return instance
@@ -240,7 +240,7 @@ class WordHighlightCollection(object):
     def save(self):
         import pickle
         collection_stream = pickle.dumps(self)
-        self.view.settings().set("wordhighlighter_collection", collection_stream)
+        self.view.settings().set("Wordhighlighter_collection", collection_stream)
 
     @classmethod
     def restore(cls, view):
