@@ -27,7 +27,7 @@ class ColorType(object):
         elif isinstance(right, ColorType):
             return self.color_string == right.color_string
         else:
-            raise ValueError("Illegal type in comparison")
+            return NotImplemented
 
     def __str__(self):
         return self.color_string
