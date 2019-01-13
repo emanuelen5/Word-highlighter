@@ -49,7 +49,7 @@ def lookup_color(color_string, variables):
 
 def get_colors(view):
     color_scheme = os.path.basename(view.settings().get("color_scheme"))
-    s = sublime.load_settings(color_scheme)
+    s = sublime.decode_value(sublime.load_resource(color_scheme))
     variables = s.get("variables")
     colors = []
     for rule in s.get("rules"):
