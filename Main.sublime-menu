@@ -14,7 +14,8 @@
                         [
                             {
                                 "caption": "Settings",
-                                "command": "edit_settings", "args":
+                                "command": "edit_settings",
+                                "args":
                                 {
                                     "base_file": "${packages}/word_highlighter/word_highlighter.sublime-settings",
                                 }
@@ -24,7 +25,8 @@
                             },
                             {
                                 "caption": "Key Bindings",
-                                "command": "edit_settings", "args":
+                                "command": "edit_settings",
+                                "args":
                                 {
                                     "base_file": "${packages}/word_highlighter/Default ($platform).sublime-keymap",
                                 }
