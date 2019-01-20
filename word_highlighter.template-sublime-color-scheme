@@ -1,81 +1,81 @@
 {
-    "author": "Erasmus Cedernaes",
-    "variables":
-    {
-        // Colors for Word Highlighter
-        "black": "hsl(0, 0%, 0%)",
-        "intense-red": "hsl(353, 100%, 64%)",
-        "radioactive-green": "hsl(143, 100%, 43%)",
-        "peach": "hsl(350, 100%, 80%)",
-        "ugly-blue": "hsl(174, 95%, 40%)",
-        "deep-purple": "hsl(269, 100%, 68%)",
-        "burning-yellow": "hsl(44, 88%, 56%)",
-        "pink": "hsl(312, 100%, 65%)",
-        "grass-green": "hsl(76, 58%, 38%)",
-        "light-brown": "hsl(21, 57%, 64%)",
-        "nice-blue": "hsl(212, 47%, 62%)",
-    },
-    "rules":
-    [
-        {
-            "name": "Word Highlighter Color 0",
-            "scope": "word_highlighter.color0",
-            "foreground": "var(black)",
-            "background": "var(intense-red)"
-        },
-        {
-            "name": "Word Highlighter Color 1",
-            "scope": "word_highlighter.color1",
-            "foreground": "var(black)",
-            "background": "var(radioactive-green)"
-        },
-        {
-            "name": "Word Highlighter Color 2",
-            "scope": "word_highlighter.color2",
-            "foreground": "var(black)",
-            "background": "var(nice-blue)"
-        },
-        {
-            "name": "Word Highlighter Color 3",
-            "scope": "word_highlighter.color3",
-            "foreground": "var(black)",
-            "background": "var(burning-yellow)"
-        },
-        {
-            "name": "Word Highlighter Color 4",
-            "scope": "word_highlighter.color4",
-            "foreground": "var(black)",
-            "background": "var(grass-green)"
-        },
-        {
-            "name": "Word Highlighter Color 5",
-            "scope": "word_highlighter.color5",
-            "foreground": "var(black)",
-            "background": "var(ugly-blue)"
-        },
-        {
-            "name": "Word Highlighter Color 6",
-            "scope": "word_highlighter.color6",
-            "foreground": "var(black)",
-            "background": "var(pink)"
-        },
-        {
-            "name": "Word Highlighter Color 7",
-            "scope": "word_highlighter.color7",
-            "foreground": "var(black)",
-            "background": "var(light-brown)"
-        },
-        {
-            "name": "Word Highlighter Color 8",
-            "scope": "word_highlighter.color8",
-            "foreground": "var(black)",
-            "background": "var(deep-purple)"
-        },
-        {
-            "name": "Word Highlighter Color 9",
-            "scope": "word_highlighter.color9",
-            "foreground": "var(black)",
-            "background": "var(peach)"
-        }
-    ]
+	"author": "Erasmus Cedernaes",
+	"variables":
+	{
+		// Colors for Word Highlighter
+		"black": "hsl(0, 0%, 0%)",
+		"intense-red": "hsl(353, 100%, 64%)",
+		"radioactive-green": "hsl(143, 100%, 43%)",
+		"peach": "hsl(350, 100%, 80%)",
+		"ugly-blue": "hsl(174, 95%, 40%)",
+		"deep-purple": "hsl(269, 100%, 68%)",
+		"burning-yellow": "hsl(44, 88%, 56%)",
+		"pink": "hsl(312, 100%, 65%)",
+		"grass-green": "hsl(76, 58%, 38%)",
+		"light-brown": "hsl(21, 57%, 64%)",
+		"nice-blue": "hsl(212, 47%, 62%)",
+	},
+	"rules":
+	[
+		{
+			"name": "Word Highlighter Color 0",
+			"scope": "word_highlighter.color0",
+			"foreground": "var(black)",
+			"background": "var(intense-red)"
+		},
+		{
+			"name": "Word Highlighter Color 1",
+			"scope": "word_highlighter.color1",
+			"foreground": "var(black)",
+			"background": "var(radioactive-green)"
+		},
+		{
+			"name": "Word Highlighter Color 2",
+			"scope": "word_highlighter.color2",
+			"foreground": "var(black)",
+			"background": "var(nice-blue)"
+		},
+		{
+			"name": "Word Highlighter Color 3",
+			"scope": "word_highlighter.color3",
+			"foreground": "var(black)",
+			"background": "var(burning-yellow)"
+		},
+		{
+			"name": "Word Highlighter Color 4",
+			"scope": "word_highlighter.color4",
+			"foreground": "var(black)",
+			"background": "var(grass-green)"
+		},
+		{
+			"name": "Word Highlighter Color 5",
+			"scope": "word_highlighter.color5",
+			"foreground": "var(black)",
+			"background": "var(ugly-blue)"
+		},
+		{
+			"name": "Word Highlighter Color 6",
+			"scope": "word_highlighter.color6",
+			"foreground": "var(black)",
+			"background": "var(pink)"
+		},
+		{
+			"name": "Word Highlighter Color 7",
+			"scope": "word_highlighter.color7",
+			"foreground": "var(black)",
+			"background": "var(light-brown)"
+		},
+		{
+			"name": "Word Highlighter Color 8",
+			"scope": "word_highlighter.color8",
+			"foreground": "var(black)",
+			"background": "var(deep-purple)"
+		},
+		{
+			"name": "Word Highlighter Color 9",
+			"scope": "word_highlighter.color9",
+			"foreground": "var(black)",
+			"background": "var(peach)"
+		}
+	]
 }

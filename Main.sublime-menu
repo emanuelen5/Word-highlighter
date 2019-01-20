@@ -1,40 +1,40 @@
 [
-    {
-        "id": "preferences",
-        "children":
-        [
-            {
-                "id": "package-settings",
-                "children":
-                [
-                    {
-                        "caption": "Word Highlighter",
-                        "mnemonic": "W",
-                        "children":
-                        [
-                            {
-                                "caption": "Settings",
-                                "command": "edit_settings",
-                                "args":
-                                {
-                                    "base_file": "${packages}/word_highlighter/word_highlighter.sublime-settings",
-                                }
-                            },
-                            {
-                                "caption": "-"
-                            },
-                            {
-                                "caption": "Key Bindings",
-                                "command": "edit_settings",
-                                "args":
-                                {
-                                    "base_file": "${packages}/word_highlighter/Default ($platform).sublime-keymap",
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    }
+	{
+		"id": "preferences",
+		"children":
+		[
+			{
+				"id": "package-settings",
+				"children":
+				[
+					{
+						"caption": "Word Highlighter",
+						"mnemonic": "W",
+						"children":
+						[
+							{
+								"caption": "Settings",
+								"command": "edit_settings",
+								"args":
+								{
+									"base_file": "${packages}/word_highlighter/word_highlighter.sublime-settings",
+								}
+							},
+							{
+								"caption": "-"
+							},
+							{
+								"caption": "Key Bindings",
+								"command": "edit_settings",
+								"args":
+								{
+									"base_file": "${packages}/word_highlighter/Default ($platform).sublime-keymap",
+								}
+							}
+						]
+					}
+				]
+			}
+		]
+	}
 ]
