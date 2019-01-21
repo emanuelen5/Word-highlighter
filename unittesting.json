@@ -1,7 +1,7 @@
 {
-    "tests_dir" : "tests",
-    "pattern" : "test*.py",
-    "reload_package_on_testing": true,
-    "output": null,
-    "generate_html_report": true
+	"tests_dir" : "tests",
+	"pattern" : "test*.py",
+	"reload_package_on_testing": true,
+	"output": null,
+	"generate_html_report": true
 }
