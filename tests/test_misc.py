@@ -89,27 +89,32 @@ def replace_dollar_constants(string:str, environment_variables:dict={"packages":
         string = regex.sub(val, string)
     return string
 
+
 class TestMainMenu(unittest.TestCase):
     def setUp(self):
         menu_short_path = "Packages/word_highlighter/Main.sublime-menu"
         main_menu = Menu.from_path(menu_short_path)
         self.menu_item = main_menu.children("preferences").children("package-settings").children("Word Highlighter", key="caption")
 
-    def assertHasEditSetting(self, caption):
-        return self.menu_item.filter("caption", caption)
+    def getEditSettingsBaseFile(self, caption):
+        menu_item = self.menu_item.filter("caption", caption)
+        objs = menu_item.get_objects()
+        self.assertEqual(1, len(objs), "There should be one setting with caption '{}'".format(caption))
+        settings_dict = objs[0]
+        self.assertIn("command", settings_dict)
+        self.assertEqual(settings_dict["command"], "edit_settings")
+        self.assertIn("args", settings_dict)
+        args = settings_dict["args"]
+        self.assertIn("base_file", args)
+        base_file = replace_dollar_constants(args["base_file"])
+        try:
+            sublime.load_resource(base_file)
+        except IOError as e:
+            raise IOError("Cannot open base file '{}': ".format(base_file))
+        return base_file
 
     def test_settings(self):
-        settings_menu_item = self.assertHasEditSetting("Settings")
-        objs = settings_menu_item.get_objects()
-        self.assertGreaterEqual(1, len(objs), "No settings found in menu")
-        key_bindings = objs[0]
-        args = key_bindings["args"]
-        base_file = args["base_file"]
+        settings_name = self.getEditSettingsBaseFile("Settings")
 
     def test_keymap(self):
-        key_bindings_menu_item = self.assertHasEditSetting("Key Bindings")
-        objs = key_bindings_menu_item.get_objects()
-        self.assertGreaterEqual(1, len(objs), "No key bindings found in menu")
-        key_bindings = objs[0]
-        args = key_bindings["args"]
-        base_file = args["base_file"]
+        key_bindings_name = self.getEditSettingsBaseFile("Key Bindings")
