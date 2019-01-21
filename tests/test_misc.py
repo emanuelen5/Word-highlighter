@@ -22,19 +22,22 @@ class Menu(object):
     def children(self, value, key="id"):
         content = []
         for obj in self.get_objects():
-            content.extend([o.get("children") for o in obj if key in o and o.get(key) == value])
+            if key in obj and obj[key] == value:
+                content.extend(obj["children"])
         return Menu(content)
 
     def get(self, key):
         content = []
         for obj in self.get_objects():
-            content.extend([o.get(key) for o in obj])
+            if key in obj:
+                content.append(obj[key])
         return Menu(content)
 
     def filter(self, key, value=None):
         content = []
         for obj in self.get_objects():
-            content.extend([o for o in obj if key in o and (value is None or o.get(key) == value)])
+            if key in obj and (value is None or obj[key] == value):
+                content.append(obj)
         return Menu(content)
 
     @classmethod
@@ -43,6 +46,40 @@ class Menu(object):
         menu_string = sublime.load_resource(menu_short_path)
         root = sublime.decode_value(menu_string)
         return cls(root)
+
+
+class TestMenu(unittest.TestCase):
+    def setUp(self):
+        menu_short_path = "Packages/word_highlighter/Main.sublime-menu"
+        self.main_menu = Menu.from_path(menu_short_path)
+
+    def test_root(self):
+        root = self.main_menu.get_objects()
+        self.assertEqual(1, len(root))
+
+    def test_filter_root(self):
+        root = self.main_menu.filter("id").get_objects()
+        self.assertEqual(1, len(root), "id exists")
+        root = self.main_menu.filter("id", "preferences").get_objects()
+        self.assertEqual(1, len(root), "id:preferences exists")
+        root = self.main_menu.filter("id", "props").get_objects()
+        self.assertEqual(0, len(root), "id:props does not exist")
+
+    def test_children(self):
+        children = self.main_menu.children("preferences")
+        objs = children.get_objects()
+        self.assertEqual(1, len(objs))
+
+    def test_children_does_not_exist(self):
+        children = self.main_menu.children("package-settings")
+        objs = children.get_objects()
+        self.assertEqual(0, len(objs))
+
+    def test_grandchildren(self):
+        children = self.main_menu.children("preferences").children("package-settings")
+        objs = children.get_objects()
+        self.assertEqual(1, len(objs))
+
 
 class TestMainMenu(unittest.TestCase):
     def setUp(self):
