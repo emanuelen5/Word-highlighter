@@ -81,6 +81,12 @@ class TestMenu(unittest.TestCase):
         self.assertEqual(1, len(objs))
 
 
+def replace_dollar_constants(string:str, environment_variables={"packages":"Packages", "platform":"Windows"}:dict):
+    import re
+    for key, val in enumerate(environment_variables):
+        string = re.sub("(${{{key}}}|{key})".format(key=re.escape(key)), string, val)
+    return string
+
 class TestMainMenu(unittest.TestCase):
     def setUp(self):
         menu_short_path = "Packages/word_highlighter/Main.sublime-menu"
