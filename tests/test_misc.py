@@ -91,18 +91,23 @@ class TestMainMenu(unittest.TestCase):
     def setUp(self):
         menu_short_path = "Packages/word_highlighter/Main.sublime-menu"
         main_menu = Menu.from_path(menu_short_path)
-        print("main_menu", main_menu.get_objects())
-        a = main_menu.children("preferences")
-        print("a", a.get_objects())
-        b = a.children("package-settings")
-        print("b", b.get_objects())
-        c = b.children("Word Highlighter", key="caption")
-        print("c", c.get_objects())
-        package_settings = c.filter("caption", "Settings")
-        print("package_settings", package_settings.get_objects())
+        self.menu_item = main_menu.children("preferences").children("package-settings").children("Word Highlighter", key="caption")
 
-    def test_settings_file_exists(self):
-        self.fail()
+    def assertHasEditSetting(self, caption):
+        return self.menu_item.filter("caption", caption)
 
-    def test_keymap_exists_windows(self):
-        self.fail()
+    def test_settings(self):
+        settings_menu_item = self.assertHasEditSetting("Settings")
+        objs = settings_menu_item.get_objects()
+        self.assertGreaterEqual(1, len(objs), "No settings found in menu")
+        key_bindings = objs[0]
+        args = key_bindings["args"]
+        base_file = args["base_file"]
+
+    def test_keymap(self):
+        key_bindings_menu_item = self.assertHasEditSetting("Key Bindings")
+        objs = key_bindings_menu_item.get_objects()
+        self.assertGreaterEqual(1, len(objs), "No key bindings found in menu")
+        key_bindings = objs[0]
+        args = key_bindings["args"]
+        base_file = args["base_file"]
