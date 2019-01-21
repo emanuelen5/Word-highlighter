@@ -81,10 +81,12 @@ class TestMenu(unittest.TestCase):
         self.assertEqual(1, len(objs))
 
 
-def replace_dollar_constants(string:str, environment_variables={"packages":"Packages", "platform":"Windows"}:dict):
+def replace_dollar_constants(string:str, environment_variables:dict={"packages":"Packages", "platform":"Windows"}):
     import re
-    for key, val in enumerate(environment_variables):
-        string = re.sub("(${{{key}}}|{key})".format(key=re.escape(key)), string, val)
+    for key, val in environment_variables.items():
+        regex_str = "\\$({{{key}}}|{key})".format(key=re.escape(key))
+        regex = re.compile(regex_str)
+        string = regex.sub(val, string)
     return string
 
 class TestMainMenu(unittest.TestCase):
