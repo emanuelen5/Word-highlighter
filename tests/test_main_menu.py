@@ -162,11 +162,19 @@ class TestMainMenu(unittest.TestCase):
         objs = menu_item.get_objects()
         self.assertEqual(1, len(objs), "There should be one setting with caption '{}'".format(caption))
         settings_dict = objs[0]
-        self.assertIn("command", settings_dict)
-        self.assertEqual(settings_dict["command"], "edit_settings")
-        self.assertIn("args", settings_dict)
+        jsonschema.validate({
+            "properties": {
+                "command": {"enum": ["edit_settings"]},
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string"
+                        }
+                    }
+                }}
+            }, settings_dict)
         args = settings_dict["args"]
-        self.assertIn("base_file", args)
         base_file = replace_dollar_constants(args["base_file"])
         try:
             sublime.load_resource(base_file)
