@@ -1,6 +1,7 @@
 import sublime
 import unittest
 from unittest.mock import patch
+import jsonschema
 
 from word_highlighter.sublime_plugin import plugin_loaded
 plugin_loaded()
@@ -46,7 +47,9 @@ class Menu(object):
         assert menu_short_path.endswith("sublime-menu")
         menu_string = sublime.load_resource(menu_short_path)
         root = sublime.decode_value(menu_string)
-        return cls(root)
+        obj = cls(root)
+        obj.data = root
+        return obj
 
 
 class TestMenu(unittest.TestCase):
@@ -97,11 +100,61 @@ def replace_dollar_constants(string:str):
     string = sublime.expand_variables(string.replace('\\', '\\\\'), variables)
     return string
 
+sublime_menu_schema = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "enum": ["preferences"]
+            },
+            "children": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "enum": ["package-settings"]
+                        },
+                        "children": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "caption": {
+                                        "type": "string"
+                                    },
+                                    "mnemonic": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 1
+                                    },
+                                    "children": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "caption": {
+                                                    "enum": ["Settings", "Key Bindings", "-"]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 class TestMainMenu(unittest.TestCase):
     def setUp(self):
         menu_short_path = "Packages/word_highlighter/Main.sublime-menu"
         main_menu = Menu.from_path(menu_short_path)
+        jsonschema.validate(main_menu.data, sublime_menu_schema)
         self.menu_item = main_menu.children("preferences").children("package-settings").children("Word Highlighter", key="caption")
 
     def getEditSettingsBaseFile(self, caption):
