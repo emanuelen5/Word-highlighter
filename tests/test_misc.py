@@ -81,12 +81,19 @@ class TestMenu(unittest.TestCase):
         self.assertEqual(1, len(objs))
 
 
-def replace_dollar_constants(string:str, environment_variables:dict={"packages":"Packages", "platform":"Windows"}):
-    import re
-    for key, val in environment_variables.items():
-        regex_str = "\\$({{{key}}}|{key})".format(key=re.escape(key))
-        regex = re.compile(regex_str)
-        string = regex.sub(val, string)
+def replace_dollar_constants(string:str):
+    platform_name = {
+        'osx': 'OSX',
+        'windows': 'Windows',
+        'linux': 'Linux',
+    }[sublime.platform()]
+
+    variables = {
+        'packages': 'Packages',
+        'platform': platform_name,
+    }
+
+    string = sublime.expand_variables(string.replace('\\', '\\\\'), variables)
     return string
 
 
