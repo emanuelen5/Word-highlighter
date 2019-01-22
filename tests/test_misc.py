@@ -1,5 +1,6 @@
 import sublime
 import unittest
+from unittest.mock import patch
 
 from word_highlighter.sublime_plugin import plugin_loaded
 plugin_loaded()
@@ -123,5 +124,19 @@ class TestMainMenu(unittest.TestCase):
     def test_settings(self):
         settings_name = self.getEditSettingsBaseFile("Settings")
 
-    def test_keymap(self):
-        key_bindings_name = self.getEditSettingsBaseFile("Key Bindings")
+    @unittest.skip("No keymap added for platform")
+    def test_keymap_osx(self):
+        with patch("sublime.platform") as platform_mock:
+            platform_mock.return_value = "osx"
+            key_bindings_name = self.getEditSettingsBaseFile("Key Bindings")
+
+    @unittest.skip("No keymap added for platform")
+    def test_keymap_linux(self):
+        with patch("sublime.platform") as platform_mock:
+            platform_mock.return_value = "linux"
+            key_bindings_name = self.getEditSettingsBaseFile("Key Bindings")
+
+    def test_keymap_windows(self):
+        with patch("sublime.platform") as platform_mock:
+            platform_mock.return_value = "windows"
+            key_bindings_name = self.getEditSettingsBaseFile("Key Bindings")
