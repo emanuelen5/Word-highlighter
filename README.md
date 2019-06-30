@@ -1,8 +1,9 @@
 # Word highlighter for Sublime Text
 [![Build Status](https://travis-ci.org/emanuelen5/Word-highlighter.svg?branch=master)](https://travis-ci.org/emanuelen5/Word-highlighter)
 [![codecov](https://codecov.io/gh/emanuelen5/Word-highlighter/branch/master/graph/badge.svg)](https://codecov.io/gh/emanuelen5/Word-highlighter)
-<a href="https://liberapay.com/emaus/donate"><img height=30px alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
-<a href="https://www.patreon.com/user?u=16251281"><img height=30px alt="Donate using Patreon" src="https://c5.patreon.com/external/logo/become_a_patron_button.png"></a>
+<a href="https://liberapay.com/emaus/donate"><img height=40px alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<a href="https://www.patreon.com/user?u=16251281"><img height=40px alt="Donate using Patreon" src="https://c5.patreon.com/external/logo/become_a_patron_button.png"></a>
+<a href="https://www.paypal.me/erasmusc/5usd"><img height=40px src="https://img.shields.io/badge/Paypal-|_Donate 5$-00457C.svg?logo=paypal&labelColor=00457C&style=popout-square"></a>
 
 The plugin is used for highlighting/colorizing occurances of words or patterns. This can simplify reading unfamiliar code, make it possible to look at the code in a new way, *or* just make the code colorful.
 
